@@ -6,9 +6,13 @@ from urllib.parse import urlparse, parse_qs
 from subprocess import call
 import sys
 import os
+import argparse
 import netifaces as ni
 from io_serial.device_serial import Serial
+from messaging.rpyc_client import Client
 
+
+msg_client = None
 
 def check_network_address(caddr, ifname='wlp2s0'):
     iface = ni.ifaddresses(ifname)[ni.AF_INET][0]
@@ -59,6 +63,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         retval = None
         path = path.split('/')[1:]
         if len(path) == 2 and path[0] == "mega":
+            msg_client.sendMsg("mega_serial", str((path[1],args)))
             if path[1] == 'blink':
                 retval = send_command("\x01\x03") - 1
             if path[1] == 'light':
@@ -73,19 +78,24 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_error(500, 'Trigger command failed')
 
 
-def run(host, port):
-    server = HTTPServer((host, port), RequestHandler)
-    print("Run http server on port", port)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-p", "--port", type=int, default=18812,
+                        help="Set port number, default is 18812")
+    parser.add_argument("-P", "--http-port", type=int, default=8080,
+                        dest='http_port',
+                        help="Set http port number, default is 8080")
+    args = parser.parse_args()
+    if args.http_port < 1024 and os.geteuid() != 0:
+        sys.stderr.write('Port {} (< 1024) requires root privileges.\n'
+                         .format(args.http_port))
+        sys.exit(-2)
+
+    msg_client = Client("http-server", args.port)
+    server = HTTPServer(("0.0.0.0", args.http_port), RequestHandler)
+    print("Run http server on port", args.http_port)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         pass
-
-if __name__ == '__main__':
-    port = 8080
-    if port < 1024 and os.geteuid() != 0:
-        sys.stderr.write('Port {} (< 1024) requires root privileges.\n'.format(port))
-        sys.exit(-2)
-
-    run("0.0.0.0", port)
     sys.exit(0)
