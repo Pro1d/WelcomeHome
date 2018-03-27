@@ -8,7 +8,6 @@ import sys
 import os
 import argparse
 import netifaces as ni
-from io_serial.device_serial import Serial
 from messaging.rpyc_client import Client
 
 
@@ -21,15 +20,6 @@ def check_network_address(caddr, ifname='wlp2s0'):
     client = map(int, caddr.split('.'))
     return all(m&c == m&a for m,a,c in zip(mask, addr, client))
 
-def send_command(cmd, header="$"):
-    try:
-        s = Serial()
-        s.write(header+cmd)
-        s.close()
-        return True
-    except Exception as e:
-        print(e)
-        return False
 
 class RequestHandler(BaseHTTPRequestHandler):
 
@@ -63,11 +53,10 @@ class RequestHandler(BaseHTTPRequestHandler):
         retval = None
         path = path.split('/')[1:]
         if len(path) == 2 and path[0] == "mega":
-            msg_client.sendMsg("mega_serial", str((path[1],args)))
-            if path[1] == 'blink':
-                retval = send_command("\x01\x03") - 1
-            if path[1] == 'light':
-                retval = send_command("\x03\x02") - 1
+            if msg_client.sendMsg("arduino", str([path[1], args])):
+                retval = 0
+            else:
+                retval = 1
         
         if retval is None:
             self.send_error(400, 'Bad Request')
