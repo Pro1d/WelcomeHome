@@ -56,7 +56,7 @@ if __name__ == "__main__":
                         help="Do not start command when task starts")
     parser.add_argument("-q", "--quick-run", dest="quick_run",
                         action="store_true",
-                        help="Smaller delay for faster run of short command")
+                        help="Smaller delay for faster run of short command. More precise period.")
     parser.add_argument("-p", "--port", type=int, default=18812,
                         help="Set port number, default is 18812")
     parser.add_argument("name", help="Name of the client.")
@@ -76,6 +76,8 @@ if __name__ == "__main__":
             while proc.poll() is None:
                 time.sleep(delay) # arg: --quick-run -> sleep(0.01)
             proc = None
+            if not args.quick_run:
+                last_run_date = time.time()
         elif exit_task or (args.auto_exit and run_count > 0 and args.period < 0):
             break
         elif args.period >= 0:
