@@ -8,16 +8,16 @@ from queue import Queue
 cmd_queue = Queue(32)
 
 ACTIONS = {
-    "off":     chr(0),
-    "on":      chr(1),
-    "toggle":  chr(2),
-    "trigger": chr(3),
-    "auto":    chr(4),
+    "off":     '0',
+    "on":      '1',
+    "toggle":  '~',
+    "trigger": 't',
+    "auto":    'a',
 }
 TARGETS = {
-    "blink":   chr(1),
-    "tetris":  chr(2),
-    "light":   chr(3),
+    "blink":   'B',
+    "tetris":  'T',
+    "light":   'L',
 }
 COMMANDS = {
     "blink": set(["trigger"]),

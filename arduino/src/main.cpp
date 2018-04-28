@@ -18,10 +18,12 @@ void blink_led() {
 
 LatchingRelayControl<LIGHT_COIL_1, LIGHT_COIL_2> toggleLight;
 LatchingRelayControl<TETRIS_COIL_SET, TETRIS_COIL_RESET> tetris;
+CommandSerial serial;
+Command cmd;
 
 void setup()
 {
-  CommandSerial::init();
+  serial.init();
   // initialize LED digital pin as an output.
   pinMode(LED_BUILTIN, OUTPUT);
   toggleLight.init(false);
@@ -30,40 +32,41 @@ void setup()
 
 void loop()
 {
-  Command c = CommandSerial::readNextCommand();
-  bool valid_command = false;
+  if(serial.readNextCommand(cmd, false)) {
+    bool valid_command = false;
 
-  switch(c.target) {
-    case LED:
-      if(c.action == TRIGGER) {
-        blink_led();
-        valid_command = true;
-      }
-      break;
-    case LIGHT:
-      if(c.action == TOGGLE) {
-        toggleLight.toggle();
-        valid_command = true;
-      }
-      break;
-    case TETRIS:
-      if(c.action == ON) {
-        tetris.on();
-        valid_command = true;
-      } else if(c.action == OFF) {
-        tetris.off();
-        valid_command = true;
-      }
-      break;
-    default:
-      break;
-  }
+    switch(cmd.target) {
+      case LED:
+        if(cmd.action == TRIGGER) {
+          blink_led();
+          valid_command = true;
+        }
+        break;
+      case LIGHT:
+        if(cmd.action == TOGGLE) {
+          toggleLight.toggle();
+          valid_command = true;
+        }
+        break;
+      case TETRIS:
+        if(cmd.action == ON) {
+          tetris.on();
+          valid_command = true;
+        } else if(cmd.action == OFF) {
+          tetris.off();
+          valid_command = true;
+        }
+        break;
+      default:
+        break;
+    }
 
-  if(!valid_command) {
-    Serial.print("Unknown command: (");
-    Serial.print(static_cast<int>(c.target), DEC);
-    Serial.print(", ");
-    Serial.print(static_cast<int>(c.action), DEC);
-    Serial.println(")");
+    if(!valid_command) {
+      Serial.print("Unknown command: (");
+      Serial.print(cmd.target);
+      Serial.print(", ");
+      Serial.print(cmd.action);
+      Serial.println(")");
+    }
   }
 }

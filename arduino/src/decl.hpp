@@ -18,15 +18,15 @@
  **/
 
 enum Target : char {
-  NONE,
-  LED,
-  TETRIS,
-  LIGHT
+  NONE = '_',
+  LED = 'B',
+  TETRIS = 'T',
+  LIGHT = 'L'
 };
 enum Action : char {
-  OFF,
-  ON,
-  TOGGLE,
-  TRIGGER,
-  AUTO
+  OFF = '0',
+  ON = '1',
+  TOGGLE = '~',
+  TRIGGER = 't',
+  AUTO = 'a'
 };
