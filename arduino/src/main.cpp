@@ -5,40 +5,27 @@
  * then off for one second, repeatedly.
  */
 #include "Arduino.h"
+#include "latching_relay_control.hpp"
 #include "command_serial.hpp"
+#include "control.hpp"
+#include "decl.hpp"
 
-#ifndef LED_BUILTIN
-#define LED_BUILTIN 13
-#endif
-#define LIGHT_COIL_1 11  
-#define LIGHT_COIL_2 12  
-
-void blink() {
+void blink_led() {
   Serial.println("Blink built-in LED");
 
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(500);
-  digitalWrite(LED_BUILTIN, LOW);
+  blink<LED_BUILTIN, 500>();
 }
 
-bool light_toggle = false;
-void toggleLight() {
-  int pinHigh = light_toggle ? LIGHT_COIL_1 : LIGHT_COIL_2;
-
-  digitalWrite(pinHigh, HIGH);
-  delay(200);
-  digitalWrite(pinHigh, LOW);
-
-  light_toggle = !light_toggle;
-}
+LatchingRelayControl<LIGHT_COIL_1, LIGHT_COIL_2> toggleLight;
+LatchingRelayControl<TETRIS_COIL_SET, TETRIS_COIL_RESET> tetris;
 
 void setup()
 {
   CommandSerial::init();
   // initialize LED digital pin as an output.
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(LIGHT_COIL_1, OUTPUT);
-  pinMode(LIGHT_COIL_2, OUTPUT);
+  toggleLight.init(false);
+  tetris.init(true);
 }
 
 void loop()
@@ -49,13 +36,22 @@ void loop()
   switch(c.target) {
     case LED:
       if(c.action == TRIGGER) {
-        blink();
+        blink_led();
         valid_command = true;
       }
       break;
     case LIGHT:
       if(c.action == TOGGLE) {
-        toggleLight();
+        toggleLight.toggle();
+        valid_command = true;
+      }
+      break;
+    case TETRIS:
+      if(c.action == ON) {
+        tetris.on();
+        valid_command = true;
+      } else if(c.action == OFF) {
+        tetris.off();
         valid_command = true;
       }
       break;

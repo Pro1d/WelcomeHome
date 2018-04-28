@@ -22,7 +22,7 @@ TARGETS = {
 COMMANDS = {
     "blink": set(["trigger"]),
     "light": set(["toggle"]),
-    #"tetris": set(["on", "off", "auto"]),
+    "tetris": set(["on", "off"]),
 }
 HEADER = "$"
 

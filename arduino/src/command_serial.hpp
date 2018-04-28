@@ -1,28 +1,8 @@
 #pragma once
 
 #include "Arduino.h"
+#include "decl.hpp"
 
-#define HEADER_BYTE (static_cast<char>('$'))
-
-/**
- * tetris on/off
- * light toggle
- * shutter up/down/stop
- **/
-
-enum Target : char {
-  NONE,
-  LED,
-  TETRIS,
-  LIGHT
-};
-enum Action : char {
-  OFF,
-  ON,
-  TOGGLE,
-  TRIGGER,
-  AUTO
-};
 
 struct Command {
   Target target;
@@ -65,7 +45,7 @@ private:
       //  Read available data until header is found
       while(Serial.available()) {
         Serial.readBytes(&c, 1);
-        if(c == HEADER_BYTE)
+        if(c == COMMAND_SERIAL_HEADER_BYTE)
           return true;
       }
       return false;
@@ -77,7 +57,7 @@ private:
         while(Serial.available() < 1)
           delay(1);
         Serial.readBytes(&c, 1);
-      } while(c != HEADER_BYTE);
+      } while(c != COMMAND_SERIAL_HEADER_BYTE);
       return true;
     }
   }
