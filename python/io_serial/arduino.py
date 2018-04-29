@@ -3,6 +3,7 @@ from io_serial.device_serial import Serial
 from messaging.rpyc_client import Client
 import argparse
 import time
+import threading
 from queue import Queue
 
 cmd_queue = Queue(32)
@@ -18,11 +19,13 @@ TARGETS = {
     "blink":   'B',
     "tetris":  'T',
     "light":   'L',
+    "debug":   'D',
 }
 COMMANDS = {
     "blink": set(["trigger"]),
     "light": set(["toggle"]),
     "tetris": set(["on", "off"]),
+    "debug": set(["trigger"]),
 }
 HEADER = "$"
 
@@ -43,6 +46,11 @@ def receiveCallback(dtype, sender, data):
     return False
 
 
+def read_serial(ser):
+    while True:
+        print(time.ctime().split()[3], ser.read_line()[:-2].decode())
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", "--port", type=int, default=18812,
@@ -55,6 +63,11 @@ if __name__ == "__main__":
     c = Client("arduino", callback=receiveCallback, port=args.port)
 
     print("Serial port:", args.file)
+
+    # read serial
+    threading.Thread(target=read_serial, args=(ser,)).start()
+
+    # Send command
     try:
         while True:
             cmd = cmd_queue.get()

@@ -8,7 +8,7 @@ import termios
 class Serial:
     #  bytesize=8, parity='N', stopbits=1
     def __init__(self, fn="/dev/ttyACM0", baudrate=9600, bytesize=8, parity='N', stopbits=1):
-        self.ser = serial.Serial(fn, baudrate, timeout=0.1,
+        self.ser = serial.Serial(fn, baudrate, timeout=None,
                                  bytesize=bytesize,
                                  parity=parity,
                                  stopbits=stopbits)
@@ -30,6 +30,10 @@ class Serial:
 
     def read(self, size=1):
         return self.ser.read(size=size)
+
+
+    def read_line(self):
+        return self.ser.readline()
 
 
     def close(self):
