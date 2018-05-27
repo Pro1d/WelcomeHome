@@ -9,6 +9,7 @@
 #include "command_serial.hpp"
 #include "control.hpp"
 #include "decl.hpp"
+#include "twinkle_core.hpp"
 
 void blink_led() {
   Serial.println("Blink built-in LED");
@@ -21,14 +22,17 @@ LatchingRelayControl<LIGHT_COIL_1, LIGHT_COIL_2> toggleLight;
 LatchingRelayControl<TETRIS_COIL_SET, TETRIS_COIL_RESET> tetris;
 CommandSerial serial;
 Command cmd;
+TwinkleCore<LIGHT_DETECTION_STATUS> twinkle_core;
+
+bool cmd_toggle_light = false;
 
 void on_button_pushed() {
-  toggleLight.toggle();
+  cmd_toggle_light = true;
 }
 
 void print_debug() {
-  int l1 = analogRead(ANALOG_LUMINOSITY_PIN1);
-  int l2 = analogRead(ANALOG_LUMINOSITY_PIN2);
+  int l1 = analogRead(ANALOG_HIGH_LUMINOSITY_PIN);
+  int l2 = analogRead(ANALOG_LOW_LUMINOSITY_PIN);
   int t = analogRead(ANALOG_TEMPERATURE_PIN);
   Serial.print("L: ");
   Serial.print(l1, DEC);
@@ -40,12 +44,13 @@ void print_debug() {
 
 void setup()
 {
+  randomSeed(analogRead(10));
   serial.init();
   // initialize LED digital pin as an output.
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(LIGHT_DETECTION_STATUS, OUTPUT);
   toggleLight.init(false);
   tetris.init(true);
+  twinkle_core.init();
   // Push button for light
   pinMode(PUSH_BUTTON_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(PUSH_BUTTON_PIN), on_button_pushed, FALLING);
@@ -94,8 +99,15 @@ void loop()
       Serial.println(")");
     }
   }
+
+  twinkle_core.update();
+
+  if(cmd_toggle_light) {
+    cmd_toggle_light = false;
+    toggleLight.toggle();
+  }
   
-  int l1 = analogRead(ANALOG_LUMINOSITY_PIN1);
-  int l2 = analogRead(ANALOG_LUMINOSITY_PIN2);
-  digitalWrite(LIGHT_DETECTION_STATUS, l1-l2 > 100 ? HIGH : LOW);
+  int l1 = analogRead(ANALOG_HIGH_LUMINOSITY_PIN);
+  int l2 = analogRead(ANALOG_LOW_LUMINOSITY_PIN);
+  twinkle_core.setMode(l1-l2 > 100 ? BLAZING : UNSTABLE);
 }

@@ -4,6 +4,7 @@ from messaging.rpyc_client import Client
 import argparse
 import time
 import threading
+import os
 from queue import Queue
 
 cmd_queue = Queue(32)
@@ -74,4 +75,4 @@ if __name__ == "__main__":
             ser.write(cmd)
             cmd_queue.task_done()
     except KeyboardInterrupt:
-        exit(0)
+        os._exit(0)
