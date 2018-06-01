@@ -10,6 +10,8 @@
 #include "control.hpp"
 #include "decl.hpp"
 #include "twinkle_core.hpp"
+#include "matrix.hpp"
+#include "snake.hpp"
 
 void blink_led() {
   Serial.println("Blink built-in LED");
@@ -23,6 +25,10 @@ LatchingRelayControl<TETRIS_COIL_SET, TETRIS_COIL_RESET> tetris;
 CommandSerial serial;
 Command cmd;
 TwinkleCore<LIGHT_DETECTION_STATUS> twinkle_core;
+constexpr int MLR[5] = MATRIX_LED_ROW;
+constexpr int MLC[7] = MATRIX_LED_COLUMN;
+Matrix<5, 7, MLR, MLC> matrix;
+SnakeAnimation<5, 7> snake;
 
 bool cmd_toggle_light = false;
 
@@ -51,6 +57,8 @@ void setup()
   toggleLight.init(false);
   tetris.init(true);
   twinkle_core.init();
+  matrix.init();
+  snake.init();
   // Push button for light
   pinMode(PUSH_BUTTON_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(PUSH_BUTTON_PIN), on_button_pushed, FALLING);
@@ -100,8 +108,6 @@ void loop()
     }
   }
 
-  twinkle_core.update();
-
   if(cmd_toggle_light) {
     cmd_toggle_light = false;
     toggleLight.toggle();
@@ -110,4 +116,9 @@ void loop()
   int l1 = analogRead(ANALOG_HIGH_LUMINOSITY_PIN);
   int l2 = analogRead(ANALOG_LOW_LUMINOSITY_PIN);
   twinkle_core.setMode(l1-l2 > 100 ? BLAZING : UNSTABLE);
+
+  twinkle_core.update();
+
+  snake.update(matrix);
+  matrix.update();
 }

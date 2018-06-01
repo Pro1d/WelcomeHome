@@ -5,6 +5,8 @@
 #define ANALOG_LOW_LUMINOSITY_PIN   1 // A1
 #define ANALOG_TEMPERATURE_PIN  2 // A2
 #define PUSH_BUTTON_PIN         2
+#define MATRIX_LED_ROW          {24, 22, 23, 27, 28}
+#define MATRIX_LED_COLUMN       {32, 30, 26, 25, 29, 31, 33}
 #define LIGHT_DETECTION_STATUS  8
 #define TETRIS_COIL_SET         9
 #define TETRIS_COIL_RESET       10
