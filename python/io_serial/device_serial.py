@@ -20,9 +20,17 @@ class Serial:
         termios.tcsetattr(fd, termios.TCSANOW, attr)
 
         # Open and write data
+        self.connect()
+
+    def connect(self):
         self.ser.close()
         self.ser.open()
 
+    def disconnect(self):
+        self.ser.close()
+
+    def is_open(self):
+        return self.ser.isOpen()
 
     def write(self, data):
         return self.ser.write(data.encode('latin-1'))

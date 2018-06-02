@@ -27,8 +27,11 @@ COMMANDS = {
     "light": set(["toggle"]),
     "tetris": set(["on", "off"]),
     "debug": set(["trigger"]),
+    "serial": set(["on", "off"]),
 }
 HEADER = "$"
+DISCONNECT = 0
+CONNECT = 1
 
 def receiveCallback(dtype, sender, data):
     msg = None
@@ -36,7 +39,8 @@ def receiveCallback(dtype, sender, data):
         domain, args = eval(data)
         assert domain in COMMANDS, "Unknown domain"
         assert args["action"] in COMMANDS[domain], "Unknown action"
-        msg = TARGETS[domain]+ACTIONS[args["action"]]
+        if domain in TARGETS:
+            msg = TARGETS[domain]+ACTIONS[args["action"]]
         print("Received:", domain, args["action"])
     except:
         print("Invalid message:", data)
@@ -44,12 +48,21 @@ def receiveCallback(dtype, sender, data):
     if msg is not None:
         cmd_queue.put(HEADER+msg)
         return True
+    elif domain == "serial":
+        cmd_queue.put({"on":CONNECT, "off":DISCONNECT}[args["action"]])
+        return True
     return False
 
 
 def read_serial(ser):
     while True:
-        print(time.ctime().split()[3], ser.read_line()[:-2].decode())
+        try:
+            if ser.is_open():
+                print(time.ctime().split()[3], ser.read_line()[:-2].decode())
+            else:
+                time.sleep(1)
+        except:
+            pass
 
 
 if __name__ == "__main__":
@@ -57,7 +70,7 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--port", type=int, default=18812,
                         help="Set port number, default is 18812")
     parser.add_argument("-f", "--file", default="/dev/ttyACM0",
-                        help="Serial file name")
+                        help="Serial file name, default is /dev/ttyACM0")
     args = parser.parse_args()
 
     ser = Serial(args.file)
@@ -72,7 +85,17 @@ if __name__ == "__main__":
     try:
         while True:
             cmd = cmd_queue.get()
-            ser.write(cmd)
+            if cmd == CONNECT:
+                ser.connect()
+                print("Open serial")
+            elif cmd == DISCONNECT:
+                ser.disconnect()
+                print("Close serial")
+            elif ser.is_open():
+                ser.write(cmd)
+                print("Write on serial")
+            else:
+                print("Serial is disconnected")
             cmd_queue.task_done()
     except KeyboardInterrupt:
         os._exit(0)
