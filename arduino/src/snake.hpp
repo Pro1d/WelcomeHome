@@ -36,6 +36,7 @@ class SnakeAnimation {
     void init() {
       last_frame = 0;
       animation_frame = 0;
+      best_score = 0;
       reset();
     }
 
@@ -81,7 +82,10 @@ class SnakeAnimation {
       // Check direction is valid
       if(best_eval == SNAKE_EVALUATE_INFINITE) {
         // GAME OVER!
-        reset();
+        playing = false;
+        if(score > best_score)
+          best_score = score;
+        // reset();
       }
       else {
         // update snake
@@ -101,9 +105,18 @@ class SnakeAnimation {
       matrix.draw(snake_grid);
       matrix.set(apple.r, apple.c);
     }
-  private:
+    bool is_playing() const {
+      return playing;
+    }
+    int get_score() const {
+      return score;
+    }
+    int get_best_score() const {
+      return best_score;
+    }
     void reset() {
       score = 0;
+      playing = true;
       // Direction: toward right
       snake_dir.r = 0;
       snake_dir.c = 1;
@@ -117,6 +130,7 @@ class SnakeAnimation {
       redraw_snake_grid();
       spawn_apple();
     }
+  private:
     void move() {
       unsigned int next_index = get_snake_index(-1);
       snake[next_index] = snake[snake_offset] + snake_dir;
@@ -170,7 +184,8 @@ class SnakeAnimation {
     Pos snake_dir;
     Pos snake[SNAKE_SIZE_MAX];
     Pos apple;
-    unsigned int score;
+    unsigned int score, best_score;
     unsigned int snake_size, snake_offset;
     byte snake_grid[ROW];
+    bool playing;
 };

@@ -44,11 +44,11 @@ void print_debug() {
   int l1 = analogRead(ANALOG_HIGH_LUMINOSITY_PIN);
   int l2 = analogRead(ANALOG_LOW_LUMINOSITY_PIN);
   int t = analogRead(ANALOG_TEMPERATURE_PIN);
-  Serial.print("L: ");
+  Serial.print("LightHigh: ");
   Serial.print(l1, DEC);
-  Serial.print(" ");
+  Serial.print(" LightLow");
   Serial.print(l2, DEC);
-  Serial.print(" T: ");
+  Serial.print(" Temperature: ");
   Serial.println(t, DEC);
 }
 
@@ -68,7 +68,7 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(PUSH_BUTTON_PIN), on_button_pushed, FALLING);
 
   text.init();
-  text.start("LOADING: 42% - ([{<\">}]) '3+X^5=-2/PI ?! |`\\@&.,;");
+  text.start("WELCOME!");
 }
 
 void loop()
@@ -129,8 +129,20 @@ void loop()
 
   twinkle_core.update();
 
-  text.update(matrix);
-  if(!text.is_playing())
+  if(text.is_playing()) {
+    text.update(matrix);
+  }
+  else {
     snake.update(matrix);
+    if(!snake.is_playing()) {
+      String str = "SCORE:";
+      str += snake.get_score();
+      str += "(";
+      str += snake.get_best_score();
+      str += ")";
+      text.start(str);
+      snake.reset();
+    }
+  }
   matrix.update();
 }

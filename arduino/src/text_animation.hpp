@@ -10,6 +10,7 @@ class TextAnimation {
       cursor = 0;
       text_len = 0;
       playing = false;
+      last_frame = 0;
     }
 
     template <const int _RO[ROW], const int _CO[COL]>
@@ -34,7 +35,7 @@ class TextAnimation {
           fetch_char(text[char_index]);
 
         for(int r = 0; r < ROW; r++)
-          matrix.set_value(r, 1, (cur_char[r] >> shift) & 0x1);
+          matrix.set_value(r, 0, (cur_char[r] >> shift) & 0x1);
       }
       else if(cursor > COL + text_len * 4) {
         playing = false;
@@ -47,6 +48,9 @@ class TextAnimation {
       return playing;
     }
 
+    void start(const String& text) {
+      start(text.c_str());
+    }
     void start(const char* text) {
       cursor = 0;
       text_len = 0;
@@ -68,10 +72,10 @@ class TextAnimation {
         cur_char[r] = pgm_read_byte_near(characters5x3 + offset + r);
     }
 
+    unsigned long last_frame;
     unsigned int cursor;
-    unsigned int last_frame;
     unsigned int text_len;
-    char text[64];
+    char text[128];
     bool playing;
     byte cur_char[ROW];
 };
