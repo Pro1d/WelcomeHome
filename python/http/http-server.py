@@ -18,7 +18,7 @@ def check_network_address(caddr, ifname='wlp2s0'):
     mask = map(int, iface['netmask'].split('.'))
     addr = map(int, iface['addr'].split('.'))
     client = map(int, caddr.split('.'))
-    return all(m&c == m&a for m,a,c in zip(mask, addr, client))
+    return caddr == '127.0.0.1' or all(m&c == m&a for m,a,c in zip(mask, addr, client))
 
 
 class RequestHandler(BaseHTTPRequestHandler):

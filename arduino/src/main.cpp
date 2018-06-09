@@ -12,11 +12,14 @@
 #include "twinkle_core.hpp"
 #include "matrix.hpp"
 #include "snake.hpp"
+#include "text_animation.hpp"
 
-void blink_led() {
+template<int DURATION>
+void blink_debug() {
   Serial.println("Blink built-in LED");
 
-  blink<LED_BUILTIN, 500>();
+  tone(TONE_PIN, 440, DURATION);
+  blink<LED_BUILTIN, DURATION>();
 }
 
 //DelayedDigitalOutput ddout;
@@ -29,6 +32,7 @@ constexpr int MLR[5] = MATRIX_LED_ROW;
 constexpr int MLC[7] = MATRIX_LED_COLUMN;
 Matrix<5, 7, MLR, MLC> matrix;
 SnakeAnimation<5, 7> snake;
+TextAnimation<5, 7> text;
 
 bool cmd_toggle_light = false;
 
@@ -62,6 +66,9 @@ void setup()
   // Push button for light
   pinMode(PUSH_BUTTON_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(PUSH_BUTTON_PIN), on_button_pushed, FALLING);
+
+  text.init();
+  text.start("LOADING: 42% - ([{<\">}]) '3+X^5=-2/PI ?! |`\\@&.,;");
 }
 
 void loop()
@@ -72,7 +79,7 @@ void loop()
     switch(cmd.target) {
       case LED:
         if(cmd.action == TRIGGER) {
-          blink_led();
+          blink_debug<500>();
           valid_command = true;
         }
         break;
@@ -88,6 +95,9 @@ void loop()
           valid_command = true;
         } else if(cmd.action == OFF) {
           tetris.off();
+          valid_command = true;
+        } else if(cmd.action == TOGGLE) {
+          tetris.toggle();
           valid_command = true;
         }
         break;
@@ -119,6 +129,8 @@ void loop()
 
   twinkle_core.update();
 
-  snake.update(matrix);
+  text.update(matrix);
+  if(!text.is_playing())
+    snake.update(matrix);
   matrix.update();
 }

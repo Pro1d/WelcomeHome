@@ -51,6 +51,10 @@ class Matrix {
       data[r] |= 1 << c;
     }
 
+    void set_value(int r, int c, bool value) {
+      data[r] = ((byte) (~(1 << c)) & data[r]) | ((byte) value << c);
+    }
+
     void update() {
       byte row = data[cursor_row];
 
@@ -58,7 +62,7 @@ class Matrix {
       digitalWrite(ROW_PINS[prev_cursor_row], HIGH);
 
       // Set each column
-      for(int c = 0; c < COL; c++, row >>= 1)
+      for(int c = COL; --c >= 0; row >>= 1)
         digitalWrite(COL_PINS[c], row & 0x1);
 
       // Turn on current row

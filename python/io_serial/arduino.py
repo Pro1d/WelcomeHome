@@ -25,7 +25,7 @@ TARGETS = {
 COMMANDS = {
     "blink": set(["trigger"]),
     "light": set(["toggle"]),
-    "tetris": set(["on", "off"]),
+    "tetris": set(["on", "off", "toggle"]),
     "debug": set(["trigger"]),
     "serial": set(["on", "off"]),
 }
