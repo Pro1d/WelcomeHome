@@ -13,6 +13,7 @@
 #include "matrix.hpp"
 #include "snake.hpp"
 #include "text_animation.hpp"
+#include "light_sensor.hpp"
 
 template<int DURATION>
 void blink_debug() {
@@ -33,6 +34,7 @@ constexpr int MLC[7] = MATRIX_LED_COLUMN;
 Matrix<5, 7, MLR, MLC> matrix;
 SnakeAnimation<5, 7> snake;
 TextAnimation<5, 7> text;
+LightSensor<ANALOG_HIGH_LUMINOSITY_PIN, ANALOG_LOW_LUMINOSITY_PIN> lightSensor;
 
 bool cmd_toggle_light = false;
 
@@ -40,14 +42,20 @@ void on_button_pushed() {
   cmd_toggle_light = true;
 }
 
+void on_bad_threshold() {
+  lightSensor.bad_threshold();
+}
+
 void print_debug() {
-  int l1 = analogRead(ANALOG_HIGH_LUMINOSITY_PIN);
-  int l2 = analogRead(ANALOG_LOW_LUMINOSITY_PIN);
   int t = analogRead(ANALOG_TEMPERATURE_PIN);
   Serial.print("LightHigh: ");
-  Serial.print(l1, DEC);
-  Serial.print(" LightLow");
-  Serial.print(l2, DEC);
+  Serial.print(lightSensor.get_luminosity_high(), DEC);
+  Serial.print(" LightLow: ");
+  Serial.print(lightSensor.get_luminosity_low(), DEC);
+  Serial.print(" LightOn: ");
+  Serial.print(lightSensor.is_light_on(), DEC);
+  Serial.print(" DayLight: ");
+  Serial.print(lightSensor.is_day_light(), DEC);
   Serial.print(" Temperature: ");
   Serial.println(t, DEC);
 }
@@ -66,9 +74,10 @@ void setup()
   // Push button for light
   pinMode(PUSH_BUTTON_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(PUSH_BUTTON_PIN), on_button_pushed, FALLING);
+  attachInterrupt(digitalPinToInterrupt(BAD_THRESHOLD_BUTTON_PIN), on_bad_threshold, FALLING);
 
   text.init();
-  text.start("WELCOME!");
+  text.start("Welcome Home!");
 }
 
 void loop()
@@ -118,14 +127,14 @@ void loop()
     }
   }
 
+  lightSensor.update();
+
   if(cmd_toggle_light) {
     cmd_toggle_light = false;
     toggleLight.toggle();
   }
   
-  int l1 = analogRead(ANALOG_HIGH_LUMINOSITY_PIN);
-  int l2 = analogRead(ANALOG_LOW_LUMINOSITY_PIN);
-  twinkle_core.setMode(l1-l2 > 100 ? BLAZING : UNSTABLE);
+  twinkle_core.setMode(lightSensor.is_light_on() == lightSensor.is_day_light() ? UNSTABLE : BLAZING);
 
   twinkle_core.update();
 
@@ -135,9 +144,9 @@ void loop()
   else {
     snake.update(matrix);
     if(!snake.is_playing()) {
-      String str = "SCORE:";
+      String str = "Score:";
       str += snake.get_score();
-      str += "(";
+      str += "(best ";
       str += snake.get_best_score();
       str += ")";
       text.start(str);

@@ -6,6 +6,7 @@
 #define ANALOG_TEMPERATURE_PIN  2 // A2
 #define PUSH_BUTTON_PIN         2
 #define TONE_PIN                3
+#define BAD_THRESHOLD_BUTTON_PIN 6
 #define MATRIX_LED_ROW          {24, 22, 23, 27, 28}
 #define MATRIX_LED_COLUMN       {32, 30, 26, 25, 29, 31, 33}
 #define LIGHT_DETECTION_STATUS  8

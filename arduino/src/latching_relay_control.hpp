@@ -4,7 +4,7 @@
 #include "control.hpp"
 #include "decl.hpp"
 
-#define LATCHING_RELAY_PULSE_DURATION  2 // ms
+#define LATCHING_RELAY_PULSE_DURATION  4 // ms
 
 template<int PIN_SET, int PIN_RESET>
 class LatchingRelayControl {
