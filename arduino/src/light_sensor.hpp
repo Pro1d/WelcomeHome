@@ -2,7 +2,7 @@
 
 #define LIGHT_SENSOR_PERIOD       1000
 #define LIGHT_ON_DIFF_THRESHOLD   100
-#define DAY_LIGHT_LIGHT_ON_LUMINOSITY_THRESHOLD   100
+#define DAY_LIGHT_LIGHT_ON_LUMINOSITY_THRESHOLD   110
 #define DAY_LIGHT_LIGHT_OFF_LUMINOSITY_THRESHOLD  50
 
 template <int HIGH_LUMINOSITY_PIN, int LOW_LUMINOSITY_PIN>
@@ -11,6 +11,7 @@ public:
   void init() {
     day_light_threshold[false] = DAY_LIGHT_LIGHT_OFF_LUMINOSITY_THRESHOLD;
     day_light_threshold[true] = DAY_LIGHT_LIGHT_ON_LUMINOSITY_THRESHOLD;
+    last_frame = 0;
   }
 
   void update() {
@@ -44,6 +45,10 @@ public:
 
   int get_luminosity_low() {
     return luminosity_low;
+  }
+
+  int threshold() {
+    return day_light_threshold[light_on];
   }
 
   bool is_light_on() {

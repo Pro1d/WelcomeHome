@@ -14,6 +14,7 @@
 #include "snake.hpp"
 #include "text_animation.hpp"
 #include "light_sensor.hpp"
+#include "auto_light_off.hpp"
 
 template<int DURATION>
 void blink_debug() {
@@ -23,8 +24,11 @@ void blink_debug() {
   blink<LED_BUILTIN, DURATION>();
 }
 
+using LightToggleType = LatchingRelayControl<LIGHT_COIL_1, LIGHT_COIL_2>;
+using LightSensorType = LightSensor<ANALOG_HIGH_LUMINOSITY_PIN, ANALOG_LOW_LUMINOSITY_PIN>;
+
 //DelayedDigitalOutput ddout;
-LatchingRelayControl<LIGHT_COIL_1, LIGHT_COIL_2> toggleLight;
+LightToggleType toggleLight;
 LatchingRelayControl<TETRIS_COIL_SET, TETRIS_COIL_RESET> tetris;
 CommandSerial serial;
 Command cmd;
@@ -34,7 +38,8 @@ constexpr int MLC[7] = MATRIX_LED_COLUMN;
 Matrix<5, 7, MLR, MLC> matrix;
 SnakeAnimation<5, 7> snake;
 TextAnimation<5, 7> text;
-LightSensor<ANALOG_HIGH_LUMINOSITY_PIN, ANALOG_LOW_LUMINOSITY_PIN> lightSensor;
+LightSensorType lightSensor;
+AutoLightOff<LightToggleType, LightSensorType> autoLightOff(toggleLight, lightSensor);
 
 bool cmd_toggle_light = false;
 
@@ -56,6 +61,8 @@ void print_debug() {
   Serial.print(lightSensor.is_light_on(), DEC);
   Serial.print(" DayLight: ");
   Serial.print(lightSensor.is_day_light(), DEC);
+  Serial.print(" LumThres: ");
+  Serial.print(lightSensor.threshold(), DEC);
   Serial.print(" Temperature: ");
   Serial.println(t, DEC);
 }
@@ -71,8 +78,11 @@ void setup()
   twinkle_core.init();
   matrix.init();
   snake.init();
+  lightSensor.init();
+  autoLightOff.init();
   // Push button for light
   pinMode(PUSH_BUTTON_PIN, INPUT_PULLUP);
+  pinMode(BAD_THRESHOLD_BUTTON_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(PUSH_BUTTON_PIN), on_button_pushed, FALLING);
   attachInterrupt(digitalPinToInterrupt(BAD_THRESHOLD_BUTTON_PIN), on_bad_threshold, FALLING);
 
@@ -127,15 +137,15 @@ void loop()
     }
   }
 
-  lightSensor.update();
-
   if(cmd_toggle_light) {
     cmd_toggle_light = false;
     toggleLight.toggle();
   }
+
+  lightSensor.update();
+  autoLightOff.update();
   
   twinkle_core.setMode(lightSensor.is_light_on() == lightSensor.is_day_light() ? UNSTABLE : BLAZING);
-
   twinkle_core.update();
 
   if(text.is_playing()) {
@@ -146,7 +156,7 @@ void loop()
     if(!snake.is_playing()) {
       String str = "Score:";
       str += snake.get_score();
-      str += "(best ";
+      str += " (best ";
       str += snake.get_best_score();
       str += ")";
       text.start(str);
