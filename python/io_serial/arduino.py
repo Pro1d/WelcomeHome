@@ -21,6 +21,7 @@ TARGETS = {
     "tetris":  'T',
     "light":   'L',
     "debug":   'D',
+    "clock":   'C',
 }
 COMMANDS = {
     "blink": set(["trigger"]),
@@ -28,6 +29,7 @@ COMMANDS = {
     "tetris": set(["on", "off", "toggle"]),
     "debug": set(["trigger"]),
     "serial": set(["on", "off"]),
+    "clock": set(), #"auto"
 }
 HEADER = "$"
 DISCONNECT = 0
@@ -64,6 +66,13 @@ def read_serial(ser):
         except:
             pass
 
+def publish_clock():
+    while True:
+        time.sleep(60)
+        t = time.localtime()
+        cmd_queue.put(HEADER+TARGETS["clock"]+ACTIONS["auto"]
+                +"%02d%02d%02d" % (t.tm_hour, t.tm_min, t.tm_sec))
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -81,6 +90,8 @@ if __name__ == "__main__":
     # read serial
     threading.Thread(target=read_serial, args=(ser,)).start()
 
+    threading.Thread(target=publish_clock).start()
+
     # Send command
     try:
         while True:
@@ -93,7 +104,7 @@ if __name__ == "__main__":
                 print("Close serial")
             elif ser.is_open():
                 ser.write(cmd)
-                print("Write on serial")
+                print("Write on serial: "+cmd)
             else:
                 print("Serial is disconnected")
             cmd_queue.task_done()

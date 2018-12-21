@@ -1,5 +1,7 @@
 #pragma once
 
+#define MATRIX_LED_ROWS 5
+#define MATRIX_LED_COLS 7
 
 #define ANALOG_HIGH_LUMINOSITY_PIN  0 // A0
 #define ANALOG_LOW_LUMINOSITY_PIN   1 // A1
@@ -32,6 +34,7 @@ enum Target : char {
   TETRIS = 'T',
   LIGHT = 'L',
   DEBUG = 'D',
+  CLOCK = 'C',
 };
 enum Action : char {
   OFF = '0',

@@ -2,11 +2,11 @@
 
 #define AUTO_LIGHT_OFF_PERIOD (5 * 1000)
 
-template <typename LightToggleT, typename LightSensorT>
+template <typename LightToggleT, typename LightSensorT, typename TextAnimationT>
 class AutoLightOff {
 public:
-  AutoLightOff(LightToggleT& toggle, LightSensorT& sensor) :
-    lightToggle(toggle), lightSensor(sensor)
+  AutoLightOff(LightToggleT& toggle, LightSensorT& sensor, TextAnimationT& text) :
+    lightToggle(toggle), lightSensor(sensor), textAnim(text)
   {}
 
   void init()
@@ -23,12 +23,15 @@ public:
 
     last_frame = t;
 
-    if(lightSensor.is_light_on() && lightSensor.is_day_light())
+    if(lightSensor.is_light_on() && lightSensor.is_day_light()) {
       lightToggle.toggle();
+      textAnim.start("~ Auto Light Off ~");
+    }
   }
 
 private:
   unsigned long last_frame;
   LightToggleT& lightToggle;
   LightSensorT& lightSensor;
+  TextAnimationT& textAnim;
 };

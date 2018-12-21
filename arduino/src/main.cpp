@@ -15,6 +15,7 @@
 #include "text_animation.hpp"
 #include "light_sensor.hpp"
 #include "auto_light_off.hpp"
+#include "clock.hpp"
 
 template<int DURATION>
 void blink_debug() {
@@ -26,6 +27,7 @@ void blink_debug() {
 
 using LightToggleType = LatchingRelayControl<LIGHT_COIL_1, LIGHT_COIL_2>;
 using LightSensorType = LightSensor<ANALOG_HIGH_LUMINOSITY_PIN, ANALOG_LOW_LUMINOSITY_PIN>;
+using TextAnimationType = TextAnimation<MATRIX_LED_ROWS, MATRIX_LED_COLS>;
 
 //DelayedDigitalOutput ddout;
 LightToggleType toggleLight;
@@ -33,13 +35,14 @@ LatchingRelayControl<TETRIS_COIL_SET, TETRIS_COIL_RESET> tetris;
 CommandSerial serial;
 Command cmd;
 TwinkleCore<LIGHT_DETECTION_STATUS> twinkle_core;
-constexpr int MLR[5] = MATRIX_LED_ROW;
-constexpr int MLC[7] = MATRIX_LED_COLUMN;
-Matrix<5, 7, MLR, MLC> matrix;
-SnakeAnimation<5, 7> snake;
-TextAnimation<5, 7> text;
+constexpr int MLR[MATRIX_LED_ROWS] = MATRIX_LED_ROW;
+constexpr int MLC[MATRIX_LED_COLS] = MATRIX_LED_COLUMN;
+Matrix<MATRIX_LED_ROWS, MATRIX_LED_COLS, MLR, MLC> matrix;
+SnakeAnimation<MATRIX_LED_ROWS, MATRIX_LED_COLS> snake;
+TextAnimationType text;
 LightSensorType lightSensor;
-AutoLightOff<LightToggleType, LightSensorType> autoLightOff(toggleLight, lightSensor);
+AutoLightOff<LightToggleType, LightSensorType, TextAnimationType> autoLightOff(toggleLight, lightSensor, text);
+Clock clock;
 
 bool cmd_toggle_light = false;
 
@@ -80,6 +83,7 @@ void setup()
   snake.init();
   lightSensor.init();
   autoLightOff.init();
+  clock.init();
   // Push button for light
   pinMode(PUSH_BUTTON_PIN, INPUT_PULLUP);
   pinMode(BAD_THRESHOLD_BUTTON_PIN, INPUT_PULLUP);
@@ -124,6 +128,11 @@ void loop()
         print_debug();
         valid_command = true;
         break;
+      case CLOCK:
+        if(cmd.action == AUTO) {
+          clock.synchronizeFromSerial();
+          valid_command = true;
+        }
       default:
         break;
     }
@@ -150,6 +159,11 @@ void loop()
 
   if(text.is_playing()) {
     text.update(matrix);
+  }
+  else if(clock.update()) {
+    char time[6];
+    clock.getTimeF(time);
+    text.start(time);
   }
   else {
     snake.update(matrix);
