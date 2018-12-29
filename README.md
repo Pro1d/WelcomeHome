@@ -24,7 +24,7 @@ My solution to make my home be smart and cozy.
     * GUI terminal disabled via `systemctl` (`lightdm.service`)
     * Disabled suspend on lid closed: `/etc/systemd/logind.conf` -> `HandleLidSwitch=ignore`
  * Python3 
-    * Main libraries: pyserial, [rpyc](https://rpyc.readthedocs.io/en/latest/), http.server
+    * Main libraries: pyserial, [rpyc](https://rpyc.readthedocs.io/en/latest/) 3.4.4, http.server
     * [Google Drive python API](https://developers.google.com/drive/v3/web/about-sdk)
  * ServerX dependent music software runs with `xvfb-run`
  * tmux for window splitting with SSH
