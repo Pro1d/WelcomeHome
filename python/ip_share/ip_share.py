@@ -23,7 +23,7 @@ if update_credential:
 # If modifying these scopes, delete your previously saved credentials
 # at ~/.credentials/drive-python-quickstart.json
 SCOPES = 'https://www.googleapis.com/auth/drive'
-CLIENT_SECRET_FILE = 'client_secret.json'
+CLIENT_SECRET_FILE = get_script_path()+"/"+'client_secret.json'
 APPLICATION_NAME = 'Drive IP Share'
 
 def get_public_ip():
