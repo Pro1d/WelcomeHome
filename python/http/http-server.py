@@ -1,25 +1,14 @@
 #!/usr/bin/python3
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
-#BaseHTTPServer
 from urllib.parse import urlparse, parse_qs
-from subprocess import call
 import sys
 import os
 import argparse
-import netifaces as ni
 from messaging.rpyc_client import Client
 
 
 msg_client = None
-
-def check_network_address(caddr, ifname='wlp2s0'):
-    iface = ni.ifaddresses(ifname)[ni.AF_INET][0]
-    mask = map(int, iface['netmask'].split('.'))
-    addr = map(int, iface['addr'].split('.'))
-    client = map(int, caddr.split('.'))
-    return caddr == '127.0.0.1' or all(m&c == m&a for m,a,c in zip(mask, addr, client))
-
 
 class RequestHandler(BaseHTTPRequestHandler):
 
@@ -32,10 +21,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                 args = parse_qs(body)
 
         args = dict((k, v[0]) for k, v in args.items())
-
-        if not check_network_address(self.client_address[0]): # [1] is sport
-            self.send_error(400, 'Bad Request')
-            return (None, None)
 
         return (parsed_req.path, args)
 
