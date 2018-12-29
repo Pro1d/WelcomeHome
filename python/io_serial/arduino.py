@@ -5,9 +5,8 @@ import argparse
 import time
 import threading
 import os
+import sys
 from queue import Queue
-
-cmd_queue = Queue(32)
 
 ACTIONS = {
     "off":     '0',
@@ -32,8 +31,6 @@ COMMANDS = {
     "clock": set(), #"auto"
 }
 HEADER = "$"
-DISCONNECT = 0
-CONNECT = 1
 
 def receiveCallback(dtype, sender, data):
     msg = None
@@ -48,65 +45,57 @@ def receiveCallback(dtype, sender, data):
         print("Invalid message:", data)
     
     if msg is not None:
-        cmd_queue.put(HEADER+msg)
+        ser.write(HEADER+msg)
         return True
     elif domain == "serial":
-        cmd_queue.put({"on":CONNECT, "off":DISCONNECT}[args["action"]])
+        if args["action"] == "on":
+            ser.connect()
+        elif args["action"] == "off":
+            ser.disconnect()
+        else:
+            return False
         return True
-    return False
-
-
-def read_serial(ser):
-    while True:
-        try:
-            if ser.is_open():
-                print(time.ctime().split()[3], ser.read_line()[:-2].decode())
-            else:
-                time.sleep(1)
-        except:
-            pass
+    else:
+        return False
 
 def publish_clock():
     while True:
         time.sleep(60)
         t = time.localtime()
-        cmd_queue.put(HEADER+TARGETS["clock"]+ACTIONS["auto"]
+        ser.write(HEADER+TARGETS["clock"]+ACTIONS["auto"]
                 +"%02d%02d%02d" % (t.tm_hour, t.tm_min, t.tm_sec))
 
+def format_time():
+    t = time.localtime()
+    return "[%4d-%02d-%02d.%02d:%02d:%02d]" % (t.tm_year, t.tm_mon, t.tm_mday,
+            t.tm_hour, t.tm_min, t.tm_sec)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", "--port", type=int, default=18812,
                         help="Set port number, default is 18812")
     parser.add_argument("-f", "--file", default="/dev/ttyACM0",
-                        help="Serial file name, default is /dev/ttyACM0")
+                        help="Serial file name, default is /dev/ttyACM0. "
+                             "See also /dev/serial/by-id/*")
     args = parser.parse_args()
 
+
+    print("Serial port:", args.file, file=sys.stderr)
     ser = Serial(args.file)
     c = Client("arduino", callback=receiveCallback, port=args.port)
 
-    print("Serial port:", args.file)
-
-    # read serial
-    threading.Thread(target=read_serial, args=(ser,)).start()
-
+    # publish clock
     threading.Thread(target=publish_clock).start()
 
-    # Send command
+    # main loop / print serial in
     try:
         while True:
-            cmd = cmd_queue.get()
-            if cmd == CONNECT:
-                ser.connect()
-                print("Open serial")
-            elif cmd == DISCONNECT:
-                ser.disconnect()
-                print("Close serial")
-            elif ser.is_open():
-                ser.write(cmd)
-                print("Write on serial: "+cmd)
+            txt = ser.read_line()
+            if txt is not None:
+                print(format_time(), txt)
             else:
-                print("Serial is disconnected")
-            cmd_queue.task_done()
+                time.sleep(1)
     except KeyboardInterrupt:
+        print("Stopping...", file=sys.stderr)
+        ser.stop()
         os._exit(0)
