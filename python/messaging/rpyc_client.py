@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 import rpyc
+import sys
+import time
 
 class ClientService(rpyc.Service):
     def exposed_catchData(self, dataType, sender, data):
@@ -13,7 +15,16 @@ class Client(object):
 
     def __init__(self, name, callback=None, address="localhost", port=18812):
         self._name = name
-        self._conn = rpyc.connect(address, port=port, service=ClientService)
+        conn = None
+        while conn is None:
+            try:
+                conn = rpyc.connect(address, port=port, service=ClientService)
+                self._conn = conn
+            except Exception as e:
+                print(e, file=sys.stderr)
+                print("Retry in 5sec...")
+                time.sleep(5)
+
         self._conn._local_root.set_callback(callback)
         self._conn.root.registerClient(name)
         rpyc.BgServingThread(self._conn)
@@ -23,7 +34,7 @@ class Client(object):
             return self._conn.root.sendDataToClient(dest, "plain-text",
                                                     self._name, data)
         except Exception as e:
-            print(e)
+            print(e, file=sys.stderr)
             return False
 
     def getAllClients(self):
