@@ -19,6 +19,8 @@ flags = None
 if update_credential:
     flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
 
+def get_script_path():
+    return os.path.dirname(os.path.realpath(sys.argv[0]))
 
 # If modifying these scopes, delete your previously saved credentials
 # at ~/.credentials/drive-python-quickstart.json
@@ -28,9 +30,6 @@ APPLICATION_NAME = 'Drive IP Share'
 
 def get_public_ip():
     return requests.get('http://ip.42.pl/raw').text
-
-def get_script_path():
-    return os.path.dirname(os.path.realpath(sys.argv[0]))
 
 def gen_time_file(fn, ip):
     with open(fn, 'r') as f:
