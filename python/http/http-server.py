@@ -42,6 +42,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 retval = 0
             else:
                 retval = 1
+        elif len(path) == 1 and path[0] == "tts" and "text" in args:
+            if msg_client.sendMsg("tts", args["text"]):
+                retval = 0
+            else:
+                retval = 1
         
         if retval is None:
             self.send_error(400, 'Bad Request')
