@@ -50,13 +50,16 @@ def receiveCallback(dtype, sender, data):
     elif domain == "serial":
         if args["action"] == "on":
             ser.connect()
+            rpc_client.sendMsg("tts", "Connecting to serial")
         elif args["action"] == "off":
             ser.disconnect()
+            rpc_client.sendMsg("tts", "Serial disconnected")
         else:
             return False
         return True
     else:
         return False
+
 
 def publish_clock():
     while True:
@@ -82,7 +85,7 @@ if __name__ == "__main__":
 
     print("Serial port:", args.file, file=sys.stderr)
     ser = Serial(args.file)
-    c = Client("arduino", callback=receiveCallback, port=args.port)
+    rpc_client = Client("arduino", callback=receiveCallback, port=args.port)
 
     # publish clock
     threading.Thread(target=publish_clock).start()
