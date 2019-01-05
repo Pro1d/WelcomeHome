@@ -13,15 +13,16 @@ class Serial:
     def __init__(self, fn="/dev/ttyACM0", baudrate=9600, bytesize=8, parity='N', stopbits=1):
         self.ser = serial.Serial(port=None, # port not given here, thus serial is not open right now
                                  baudrate=baudrate,
-                                 timeout=5,  # read timeout
-                                 write_timeout=5, # write timeout
+                                 timeout=1,  # read timeout
+                                 write_timeout=1, # write timeout
                                  bytesize=bytesize,
                                  parity=parity,
                                  stopbits=stopbits)
         self.ser.setPort(fn)
 
         # connected, disconnected, connecting, stopping
-        self._state = "connecting"
+        self._state = None
+        self._update_state("connecting", "Connecting...")
         self._state_lock = threading.Lock()
 
         self._write_queue = Queue(32)
@@ -36,7 +37,7 @@ class Serial:
     
     def stop(self):
         self._state_lock.acquire()
-        self._state = "stopping"
+        self._update_state("stopping", "Disconnect and stop.")
         self._state_lock.release()
         self._write_thread.join()
         self._read_thread.join()
@@ -45,23 +46,27 @@ class Serial:
     def connect(self):
         self._state_lock.acquire()
         if self._state == "disconnected":
-            self._state = "connecting"
+            self._update_state("connecting", "Connecting...")
         self._state_lock.release()
 
     def disconnect(self):
         self._state_lock.acquire()
         if self._state == "connecting" or self._state == "connected":
-            self._state = "disconnected"
+            self._update_state("disconnected", "Disconnected")
         self._state_lock.release()
 
     def get_state(self):
         return self._state
 
+    def _update_state(self, new_state, info=None):
+        if new_state != self._state:
+            if info:
+                print(info)
+            self._state = new_state
+
     def state_loop(self):
-        print("Thread state", file=sys.stderr)
         while True:
             self._state_lock.acquire()
-            print("State: ", self._state, file=sys.stderr)
             if self._state == "connecting":
                 try:
                     self.ser.close()
@@ -72,32 +77,33 @@ class Serial:
                     attr[2] &= ~termios.HUPCL
                     termios.tcsetattr(fd, termios.TCSANOW, attr)
                 except serial.serialutil.SerialException as e:
-                    #print(e)
                     self.ser.close()
                 if self.ser.isOpen():
-                    self._state = "connected"
+                    self._update_state("connected", "Connected!")
                     self._state_lock.release()
                 else:
                     self._state_lock.release()
+                    print("Cannot connect to serial, retry in 5 sec...")
                     time.sleep(5)
             elif self._state == "connected":
                 if not self.ser.isOpen():
-                    self._state = "connecting"
+                    self._update_state("connecting", "Connection lost, reconnecting...")
                     self._state_lock.release()
                 else:
                     self._state_lock.release()
-                    time.sleep(5)
+                    time.sleep(1)
             elif self._state == "disconnected":
                 if self.ser.isOpen():
                     self.ser.close()
                     self._state_lock.release()
                 else:
                     self._state_lock.release()
-                    time.sleep(5)
-            else: # stopping
+                    time.sleep(1)
+            elif self._state == "stopping":
                 self.ser.close()
-                self._state = "stopping"
                 self._state_lock.release()
+                break
+            else:
                 break
         
     def write(self, data):
@@ -105,43 +111,47 @@ class Serial:
             self._write_queue.put(data)
 
     def write_loop(self):
-        print("Thread write", file=sys.stderr)
         while self._state != "stopping":
             try:
-                data = self._write_queue.get(timeout=5)
+                data = self._write_queue.get(timeout=1)
                 if self._state == "connected":
-                    self.ser.write(data.encode("latin-1"))
+                    self.ser.write(data.encode())
                 self._write_queue.task_done()
             except serial.serialutil.SerialException as e:
                 # Connection lost ->  reconnecting
                 self._state_lock.acquire()
-                self._state = "connecting"
+                self._update_state("connecting", "Connection lost, reconnecting...")
                 self._state_lock.release()
-                time.sleep(5)
             except queue.Empty:
                 pass
 
-    def read_line(self):
+    def read(self, blocking=True):
         if self._state == "connected" or not self._read_queue.empty():
-            data = self._read_queue.get()
-            self._read_queue.task_done()
-            return data
+            try:
+                data = self._read_queue.get(block=blocking)
+                self._read_queue.task_done()
+                return data
+            except queue.Empty:
+                return None
         else:
             return None
 
     def read_loop(self):
-        print("Thread read", file=sys.stderr)
         while self._state != "stopping":
             if self._state == "connected":
                 try:
-                    line = self.ser.readline()
-                    if line:
-                        self._read_queue.put(line[:-2].decode())
+                    # read 1 byte with blocking mode (and timeout)
+                    data = self.ser.read(size=1)
+                    # if not timeout, data is not empty
+                    if data:
+                        # then read all remaining OS buffer
+                        data += self.ser.read_all()
+                        self._read_queue.put(data)
                 except serial.serialutil.SerialException as e:
                     # Connection lost ->  reconnecting
                     self._state_lock.acquire()
-                    self._state = "connecting"
+                    self._update_state("connecting", "Connection lost, reconnecting...")
                     self._state_lock.release()
-                    time.sleep(5)
+                    time.sleep(1)
             else:
-                time.sleep(5) # wait for reconnection
+                time.sleep(1) # wait for reconnection

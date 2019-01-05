@@ -6,6 +6,7 @@ import time
 import threading
 import os
 import sys
+import struct
 from queue import Queue
 
 ACTIONS = {
@@ -30,7 +31,63 @@ COMMANDS = {
     "serial": set(["on", "off"]),
     "clock": set(), #"auto"
 }
+
 HEADER = "$"
+bHEADER = HEADER.encode()
+
+SERIAL_MSG_DESC = {
+        # HEADER+TYPE:
+        #   type, (fmt cf. struct + S for uint16+string), (field names)
+        bHEADER+b'E':
+            ('event',   '<cch',  ('action', 'mode', 'value')),
+        bHEADER+b'D':
+            ('debug',   '<S',    ('text',)),
+        bHEADER+b'S':
+            ('sensors', '<??hh', ('light_on', 'day_light', 'luminosity_high', 'luminosity_low')),
+}
+
+def messageSegmentation(data):
+    i = 0
+    msgs = []
+    while i+2 <= len(data):
+        # seek to begin of next message
+        while data[i:i+2] not in SERIAL_MSG_DESC:
+            i += 1
+            if i+2 > len(data):
+                return (msgs, i)
+        
+        # save the current index, if the message is incomplete, the next
+        # messageSegment will start at this index
+        begin = i
+
+        # build format
+        name, fmt, fields = SERIAL_MSG_DESC[data[i:i+2]]
+        endianness = fmt[0]
+        fmt = fmt.split('S')
+        for f in range(0, len(fmt)-1):
+            fmt[f] = fmt[f]+'H' # add uint16 before each 'S'
+        i += 2
+        
+        # unpack
+        pack = []
+        for f in range(len(fmt)):
+            if f > 0: # add endianness and '{n}s' for char[n]
+                strlen = pack[-1]
+                del pack[-1]
+                fmt[f] = endianness+str(strlen)+'s'+fmt[f]
+            # check data length
+            size = struct.calcsize(fmt[f])
+            if i+size > len(data):
+                return (msgs, begin)
+            else:
+                pack += [*struct.unpack(fmt[f], data[i:i+size])]
+            i += size
+
+        # add new message and update cursor
+        msgs.append(dict(zip(fields, pack)))
+        msgs[-1]['type'] = name
+
+    return (msgs, i)
 
 def receiveCallback(dtype, sender, data):
     msg = None
@@ -84,18 +141,28 @@ if __name__ == "__main__":
 
 
     print("Serial port:", args.file, file=sys.stderr)
-    ser = Serial(args.file)
+    ser = Serial(args.file, baudrate=115200)
     rpc_client = Client("arduino", callback=receiveCallback, port=args.port)
 
     # publish clock
     threading.Thread(target=publish_clock).start()
 
-    # main loop / print serial in
+    # main loop / read message from serial
     try:
+        buf = b''
         while True:
-            txt = ser.read_line()
-            if txt is not None:
-                print(format_time(), txt)
+            data = ser.read()
+            if data is not None:
+                buf += data
+                msgs, cursor = messageSegmentation(buf)
+                buf = buf[cursor:]
+                for m in msgs:
+                    if m['type'] == "debug":
+                        print(format_time() + " " + m['text'].decode())
+                    elif m['type'] == "sensors":
+                        pass
+                    elif m['type'] == "event":
+                        pass
             else:
                 time.sleep(1)
     except KeyboardInterrupt:
