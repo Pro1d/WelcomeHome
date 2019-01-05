@@ -1,6 +1,6 @@
 #pragma once
 
-#define SERIAL_BAUDRATE 96000
+#define SERIAL_BAUDRATE 115200
 
 #define MATRIX_LED_ROWS 5
 #define MATRIX_LED_COLS 7

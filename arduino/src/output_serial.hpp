@@ -3,6 +3,7 @@
 #include "Arduino.h"
 #include "decl.hpp"
 
+#define NSTR(X) sizeof(X)-1, X
 
 class OutputSerial {
 public:
@@ -19,7 +20,7 @@ public:
 private:
   void header(Content type) {
     Serial.write(SERIAL_HEADER_BYTE);
-    Serial.write((uint8_t*)&type, sizeof(Content));
+    Serial.write(type);
   }
 
   template <typename LastData>
@@ -37,3 +38,6 @@ private:
     pack(next...);
   }
 };
+
+extern OutputSerial OSerial;
+

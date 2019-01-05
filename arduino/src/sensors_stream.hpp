@@ -2,12 +2,11 @@
 
 #define SENSORS_STREAM_PERIOD 1000 // ms
 
-template <typename Stream, typename LightSensorType>
+template <typename LightSensorType>
 class SensorsStream {
 public:
-  SensorsStream(Stream& stream, const LightSensorType& lsensor)
+  SensorsStream(const LightSensorType& lsensor)
     : light_sensor{lsensor}
-    , stream{stream}
   {
   }
 
@@ -23,7 +22,7 @@ public:
 
     last_frame = t;
     
-    stream.send(C_SENSORS,
+    OSerial.send(C_SENSORS,
         light_sensor.is_light_on(),
         light_sensor.is_day_light(),
         light_sensor.get_luminosity_high(),
@@ -33,5 +32,4 @@ public:
 private:
   unsigned long last_frame;
   const LightSensorType& light_sensor;
-  Stream& stream;
 };

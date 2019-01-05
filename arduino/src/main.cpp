@@ -19,7 +19,8 @@
 #include "clock.hpp"
 #include "sensors_stream.hpp"
 
-#define NSTR(X) sizeof(X)-1, X
+// Global variable - declared in output_serial.hpp
+OutputSerial OSerial;
 
 using LightToggleType = LatchingRelayControl<LIGHT_COIL_1, LIGHT_COIL_2>;
 using LightSensorType = LightSensor<ANALOG_HIGH_LUMINOSITY_PIN, ANALOG_LOW_LUMINOSITY_PIN>;
@@ -30,7 +31,6 @@ LightToggleType toggleLight;
 LatchingRelayControl<TETRIS_COIL_SET, TETRIS_COIL_RESET> tetris;
 CommandSerial serial;
 Command cmd;
-OutputSerial output_serial;
 TwinkleCore<LIGHT_DETECTION_STATUS> twinkle_core;
 constexpr int MLR[MATRIX_LED_ROWS] = MATRIX_LED_ROW;
 constexpr int MLC[MATRIX_LED_COLS] = MATRIX_LED_COLUMN;
@@ -40,7 +40,7 @@ TextAnimationType text;
 LightSensorType lightSensor;
 AutoLightOff<LightToggleType, LightSensorType, TextAnimationType> autoLightOff(toggleLight, lightSensor, text);
 Clock clock;
-SensorsStream<OutputSerial, LightSensorType> sensors_stream(output_serial, lightSensor);
+SensorsStream<LightSensorType> sensors_stream(lightSensor);
 
 bool cmd_toggle_light = false;
 
@@ -54,7 +54,7 @@ void on_bad_threshold() {
 
 template<int DURATION>
 void blink_debug() {
-  output_serial.send(C_DEBUG, NSTR("Blink built-in LED"));
+  OSerial.send(C_DEBUG, NSTR("Blink built-in LED"));
 
   tone(TONE_PIN, 440, DURATION);
   blink<LED_BUILTIN, DURATION>();
@@ -80,7 +80,7 @@ void setup()
 {
   randomSeed(analogRead(10));
   serial.init();
-  // output_serial.init();
+  // OSerial.init();
   // initialize LED digital pin as an output.
   pinMode(LED_BUILTIN, OUTPUT);
   toggleLight.init(false);
@@ -147,7 +147,7 @@ void loop()
     }
 
     if(!valid_command) {
-      output_serial.send(C_DEBUG, NSTR("Unknown command"));
+      OSerial.send(C_DEBUG, NSTR("Unknown command"));
     }
   }
 
