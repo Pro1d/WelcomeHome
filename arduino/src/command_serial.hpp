@@ -12,7 +12,7 @@ struct Command {
 class CommandSerial {
 public:
   void init() {
-    Serial.begin(9600);
+    Serial.begin(SERIAL_BAUDRATE);
   }
 
   bool readNextCommand(Command& cmd, bool blocking = true) {
@@ -34,7 +34,7 @@ public:
       // Check header byte
       Serial.readBytes(&header, 1);
     
-    } while(header != COMMAND_SERIAL_HEADER_BYTE);
+    } while(header != SERIAL_HEADER_BYTE);
     
     // Read data
     Serial.readBytes(reinterpret_cast<char*>(&cmd), sizeof(Command));

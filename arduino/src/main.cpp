@@ -7,6 +7,7 @@
 #include "Arduino.h"
 #include "latching_relay_control.hpp"
 #include "command_serial.hpp"
+#include "output_serial.hpp"
 #include "control.hpp"
 #include "decl.hpp"
 #include "twinkle_core.hpp"
@@ -16,14 +17,9 @@
 #include "light_sensor.hpp"
 #include "auto_light_off.hpp"
 #include "clock.hpp"
+#include "sensors_stream.hpp"
 
-template<int DURATION>
-void blink_debug() {
-  Serial.println("Blink built-in LED");
-
-  tone(TONE_PIN, 440, DURATION);
-  blink<LED_BUILTIN, DURATION>();
-}
+#define NSTR(X) sizeof(X)-1, X
 
 using LightToggleType = LatchingRelayControl<LIGHT_COIL_1, LIGHT_COIL_2>;
 using LightSensorType = LightSensor<ANALOG_HIGH_LUMINOSITY_PIN, ANALOG_LOW_LUMINOSITY_PIN>;
@@ -34,6 +30,7 @@ LightToggleType toggleLight;
 LatchingRelayControl<TETRIS_COIL_SET, TETRIS_COIL_RESET> tetris;
 CommandSerial serial;
 Command cmd;
+OutputSerial output_serial;
 TwinkleCore<LIGHT_DETECTION_STATUS> twinkle_core;
 constexpr int MLR[MATRIX_LED_ROWS] = MATRIX_LED_ROW;
 constexpr int MLC[MATRIX_LED_COLS] = MATRIX_LED_COLUMN;
@@ -43,6 +40,7 @@ TextAnimationType text;
 LightSensorType lightSensor;
 AutoLightOff<LightToggleType, LightSensorType, TextAnimationType> autoLightOff(toggleLight, lightSensor, text);
 Clock clock;
+SensorsStream<OutputSerial, LightSensorType> sensors_stream(output_serial, lightSensor);
 
 bool cmd_toggle_light = false;
 
@@ -54,26 +52,35 @@ void on_bad_threshold() {
   lightSensor.bad_threshold();
 }
 
+template<int DURATION>
+void blink_debug() {
+  output_serial.send(C_DEBUG, NSTR("Blink built-in LED"));
+
+  tone(TONE_PIN, 440, DURATION);
+  blink<LED_BUILTIN, DURATION>();
+}
+
 void print_debug() {
-  int t = analogRead(ANALOG_TEMPERATURE_PIN);
-  Serial.print("LightHigh: ");
-  Serial.print(lightSensor.get_luminosity_high(), DEC);
-  Serial.print(" LightLow: ");
-  Serial.print(lightSensor.get_luminosity_low(), DEC);
-  Serial.print(" LightOn: ");
-  Serial.print(lightSensor.is_light_on(), DEC);
-  Serial.print(" DayLight: ");
-  Serial.print(lightSensor.is_day_light(), DEC);
-  Serial.print(" LumThres: ");
-  Serial.print(lightSensor.threshold(), DEC);
-  Serial.print(" Temperature: ");
-  Serial.println(t, DEC);
+  //int t = analogRead(ANALOG_TEMPERATURE_PIN);
+  //Serial.print("LightHigh: ");
+  //Serial.print(lightSensor.get_luminosity_high(), DEC);
+  //Serial.print(" LightLow: ");
+  //Serial.print(lightSensor.get_luminosity_low(), DEC);
+  //Serial.print(" LightOn: ");
+  //Serial.print(lightSensor.is_light_on(), DEC);
+  //Serial.print(" DayLight: ");
+  //Serial.print(lightSensor.is_day_light(), DEC);
+  //Serial.print(" LumThres: ");
+  //Serial.print(lightSensor.threshold(), DEC);
+  //Serial.print(" Temperature: ");
+  //Serial.println(t, DEC);
 }
 
 void setup()
 {
   randomSeed(analogRead(10));
   serial.init();
+  // output_serial.init();
   // initialize LED digital pin as an output.
   pinMode(LED_BUILTIN, OUTPUT);
   toggleLight.init(false);
@@ -89,6 +96,8 @@ void setup()
   pinMode(BAD_THRESHOLD_BUTTON_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(PUSH_BUTTON_PIN), on_button_pushed, FALLING);
   attachInterrupt(digitalPinToInterrupt(BAD_THRESHOLD_BUTTON_PIN), on_bad_threshold, FALLING);
+
+  sensors_stream.init();
 
   text.init();
   text.start("Welcome Home!");
@@ -138,11 +147,7 @@ void loop()
     }
 
     if(!valid_command) {
-      Serial.print("Unknown command: (");
-      Serial.write(cmd.target);
-      Serial.print(", ");
-      Serial.write(cmd.action);
-      Serial.println(")");
+      output_serial.send(C_DEBUG, NSTR("Unknown command"));
     }
   }
 
@@ -153,6 +158,7 @@ void loop()
 
   lightSensor.update();
   autoLightOff.update();
+  sensors_stream.update();
   
   twinkle_core.setMode(lightSensor.is_light_on() == lightSensor.is_day_light() ? UNSTABLE : BLAZING);
   twinkle_core.update();

@@ -39,23 +39,23 @@ public:
     Serial.println(".");
   }
 
-  int get_luminosity_high() {
+  int get_luminosity_high() const {
     return luminosity_high;
   }
 
-  int get_luminosity_low() {
+  int get_luminosity_low() const {
     return luminosity_low;
   }
 
-  int threshold() {
+  int threshold() const {
     return day_light_threshold[light_on];
   }
 
-  bool is_light_on() {
+  bool is_light_on() const {
     return light_on;
   }
 
-  bool is_day_light() {
+  bool is_day_light() const {
     return day_light;
   }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#define SERIAL_BAUDRATE 96000
+
 #define MATRIX_LED_ROWS 5
 #define MATRIX_LED_COLS 7
 
@@ -20,7 +22,7 @@
 #define LED_BUILTIN             13
 #endif
 
-#define COMMAND_SERIAL_HEADER_BYTE (static_cast<char>('$'))
+#define SERIAL_HEADER_BYTE (static_cast<char>('$'))
 
 /**
  * tetris on/off
@@ -36,10 +38,28 @@ enum Target : char {
   DEBUG = 'D',
   CLOCK = 'C',
 };
+
 enum Action : char {
   OFF = '0',
   ON = '1',
   TOGGLE = '~',
   TRIGGER = 't',
   AUTO = 'a'
+};
+
+enum Content : char {
+  C_SENSORS = 'S', // '$S'+[sensor values]
+  C_EVENT = 'E', // '$E'+Event+Mode+value
+  C_DEBUG = 'D' // '$D'+length+'str'
+};
+
+enum Event : char {
+  E_LIGHT = 'L',
+  E_TETRIS = 'T',
+  E_NEW_HIGH_SCORE = 'N'
+};
+
+enum EventMode : char {
+  EM_AUTO = 'A',
+  EM_MANUAL = 'M'
 };
