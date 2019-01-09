@@ -83,8 +83,13 @@ class SnakeAnimation {
       if(best_eval == SNAKE_EVALUATE_INFINITE) {
         // GAME OVER!
         playing = false;
-        if(score > best_score)
+        if(score > best_score) {
           best_score = score;
+          OSerial.send(C_EVENT, E_SNAKE_HIGH_SCORE, static_cast<long>(best_score));
+        }
+        else {
+          OSerial.send(C_EVENT, E_SNAKE_SCORE, static_cast<long>(score));
+        }
         // reset();
       }
       else {

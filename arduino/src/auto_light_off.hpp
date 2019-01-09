@@ -26,6 +26,7 @@ public:
     if(lightSensor.is_light_on() && lightSensor.is_day_light()) {
       lightToggle.toggle();
       textAnim.start("~ Auto Light Off ~");
+      OSerial.send(C_EVENT, E_AUTO_LIGHT_OFF, static_cast<unsigned long>(0));
     }
   }
 

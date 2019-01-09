@@ -49,17 +49,12 @@ enum Action : char {
 
 enum Content : char {
   C_SENSORS = 'S', // '$S'+[sensor values]
-  C_EVENT = 'E', // '$E'+Event+Mode+value
+  C_EVENT = 'E', // '$E'+Event+32bits data
   C_DEBUG = 'D' // '$D'+length+'str'
 };
 
 enum Event : char {
-  E_LIGHT = 'L',
-  E_TETRIS = 'T',
-  E_NEW_HIGH_SCORE = 'N'
-};
-
-enum EventMode : char {
-  EM_AUTO = 'A',
-  EM_MANUAL = 'M'
+  E_AUTO_LIGHT_OFF = 'L',
+  E_SNAKE_HIGH_SCORE = 'H',
+  E_SNAKE_SCORE = 'S'
 };
