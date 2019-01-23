@@ -9,7 +9,7 @@ import sys
 text_queue = Queue(64)
 CLIENT_NAME = "tts"
 PLAYER_PRG = "/usr/bin/mplayer"
-PLAYER_ARGS = "-ao alsa -really-quiet -noconsolecontrols -volume 50"
+PLAYER_ARGS = "-ao alsa -really-quiet -noconsolecontrols -volume 50 -softvol"
 
 def build_url(txt):
     # "A0a" -> "%41%30%61"

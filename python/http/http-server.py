@@ -47,6 +47,18 @@ class RequestHandler(BaseHTTPRequestHandler):
                 retval = 0
             else:
                 retval = 1
+        elif len(path) == 2 and path[0] == "player":
+            if msg_client.sendMsg("mediaplayer", str((path[1], args))):
+                retval = 0
+            else:
+                retval = 1
+        elif path == ['system', 'reboot']:
+            if os.geteuid() != 0:
+                retval = 1
+            else:
+                retval = 0
+                msg_client.sendMsg("tts", "System reboot")
+                sys.Popen(['reboot'])
         
         if retval is None:
             self.send_error(400, 'Bad Request')
@@ -70,7 +82,7 @@ if __name__ == '__main__':
                          .format(args.http_port))
         sys.exit(-2)
 
-    msg_client = Client("http-server", args.port)
+    msg_client = Client("http-server", port=args.port)
     server = HTTPServer(("0.0.0.0", args.http_port), RequestHandler)
     print("Run http server on port", args.http_port)
     try:

@@ -39,12 +39,16 @@ SERIAL_MSG_DESC = {
         # HEADER+TYPE:
         #   type, (fmt cf. struct + S for uint16+string), (field names)
         bHEADER+b'E':
-            ('event',   '<cch',  ('action', 'mode', 'value')),
+            ('event',   '<cI',  ('subtype', 'data32')),
         bHEADER+b'D':
             ('debug',   '<S',    ('text',)),
         bHEADER+b'S':
             ('sensors', '<??hh', ('light_on', 'day_light', 'luminosity_high', 'luminosity_low')),
 }
+# Event Subtype list
+EST_AUTO_LIGHT_OFF = b'L'
+EST_SNAKE_HIGH_SCORE = b'H'
+EST_SNAKE_SCORE = b'S'
 
 def messageSegmentation(data):
     i = 0
@@ -130,6 +134,10 @@ def format_time():
     return "[%4d-%02d-%02d.%02d:%02d:%02d]" % (t.tm_year, t.tm_mon, t.tm_mday,
             t.tm_hour, t.tm_min, t.tm_sec)
 
+def write_snake_score(score):
+    with open('/home/pi/snake_score.txt', 'a') as f:
+        f.write(str(score)+'\n')
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", "--port", type=int, default=18812,
@@ -162,7 +170,14 @@ if __name__ == "__main__":
                     elif m['type'] == "sensors":
                         pass
                     elif m['type'] == "event":
-                        pass
+                        if m['subtype'] == EST_AUTO_LIGHT_OFF:
+                            rpc_client.sendMsg("tts", "Automatic switch off")
+                        elif m['subtype'] == EST_SNAKE_HIGH_SCORE:
+                            if 9 <= time.localtime().tm_hour < 23:
+                                rpc_client.sendMsg("tts", "The new high score is {}! Congratulation".format(m['data32']))
+                            write_snake_score(m['data32'])
+                        elif m['subtype'] == EST_SNAKE_SCORE:
+                            write_snake_score(m['data32'])
             else:
                 time.sleep(1)
     except KeyboardInterrupt:
