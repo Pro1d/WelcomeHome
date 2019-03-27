@@ -43,7 +43,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             else:
                 retval = 1
         elif len(path) == 1 and path[0] == "tts" and "text" in args:
-            if msg_client.sendMsg("tts", args["text"]):
+            lang = [args["lang"]] if "lang" in args else []
+            if msg_client.sendMsg("tts", str(lang + [args["text"]])):
                 retval = 0
             else:
                 retval = 1
