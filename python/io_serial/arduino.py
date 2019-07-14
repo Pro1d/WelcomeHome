@@ -22,6 +22,8 @@ TARGETS = {
     "light":   'L',
     "debug":   'D',
     "clock":   'C',
+    "plug1":   'P',
+    "plug2":   'Q',
 }
 COMMANDS = {
     "blink": set(["trigger"]),
@@ -30,6 +32,8 @@ COMMANDS = {
     "debug": set(["trigger"]),
     "serial": set(["on", "off"]),
     "clock": set(), #"auto"
+    "plug1": set(["on", "off", "toggle"]),
+    "plug2": set(["on", "off", "toggle"]),
 }
 
 HEADER = "$"
