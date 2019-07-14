@@ -1,9 +1,3 @@
-/**
- * Blink
- *
- * Turns on an LED on for one second,
- * then off for one second, repeatedly.
- */
 #include "Arduino.h"
 #include "latching_relay_control.hpp"
 #include "command_serial.hpp"
@@ -18,6 +12,8 @@
 #include "auto_light_off.hpp"
 #include "clock.hpp"
 #include "sensors_stream.hpp"
+#include "transmitter_433.hpp"
+#include "plug_remote_control.hpp"
 
 // Global variable - declared in output_serial.hpp
 OutputSerial OSerial;
@@ -25,6 +21,7 @@ OutputSerial OSerial;
 using LightToggleType = LatchingRelayControl<LIGHT_COIL_1, LIGHT_COIL_2>;
 using LightSensorType = LightSensor<ANALOG_HIGH_LUMINOSITY_PIN, ANALOG_LOW_LUMINOSITY_PIN>;
 using TextAnimationType = TextAnimation<MATRIX_LED_ROWS, MATRIX_LED_COLS>;
+using TransmitterType = Transmitter433<TRANSMITTER_433_PIN, PRC_PERIOD, PRC_DURATION_ONE, PRC_DURATION_ZERO>;
 
 //DelayedDigitalOutput ddout;
 LightToggleType toggleLight;
@@ -41,15 +38,14 @@ LightSensorType lightSensor;
 AutoLightOff<LightToggleType, LightSensorType, TextAnimationType> autoLightOff(toggleLight, lightSensor, text);
 Clock clock;
 SensorsStream<LightSensorType> sensors_stream(lightSensor);
+TransmitterType tm433;
+PlugRemoteControl<TransmitterType, PRC_BITS_I1> plug_rc_1(tm433);
+PlugRemoteControl<TransmitterType, PRC_BITS_I2> plug_rc_2(tm433);
 
 bool cmd_toggle_light = false;
 
 void on_button_pushed() {
   cmd_toggle_light = true;
-}
-
-void on_bad_threshold() {
-  lightSensor.bad_threshold();
 }
 
 template<int DURATION>
@@ -58,22 +54,6 @@ void blink_debug() {
 
   tone(TONE_PIN, 440, DURATION);
   blink<LED_BUILTIN, DURATION>();
-}
-
-void print_debug() {
-  //int t = analogRead(ANALOG_TEMPERATURE_PIN);
-  //Serial.print("LightHigh: ");
-  //Serial.print(lightSensor.get_luminosity_high(), DEC);
-  //Serial.print(" LightLow: ");
-  //Serial.print(lightSensor.get_luminosity_low(), DEC);
-  //Serial.print(" LightOn: ");
-  //Serial.print(lightSensor.is_light_on(), DEC);
-  //Serial.print(" DayLight: ");
-  //Serial.print(lightSensor.is_day_light(), DEC);
-  //Serial.print(" LumThres: ");
-  //Serial.print(lightSensor.threshold(), DEC);
-  //Serial.print(" Temperature: ");
-  //Serial.println(t, DEC);
 }
 
 void setup()
@@ -91,11 +71,12 @@ void setup()
   lightSensor.init();
   autoLightOff.init();
   clock.init();
+  tm433.init();
+  plug_rc_1.init(false);
+  plug_rc_2.init(false);
   // Push button for light
   pinMode(PUSH_BUTTON_PIN, INPUT_PULLUP);
-  pinMode(BAD_THRESHOLD_BUTTON_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(PUSH_BUTTON_PIN), on_button_pushed, FALLING);
-  attachInterrupt(digitalPinToInterrupt(BAD_THRESHOLD_BUTTON_PIN), on_bad_threshold, FALLING);
 
   sensors_stream.init();
 
@@ -109,6 +90,7 @@ void loop()
     bool valid_command = false;
 
     switch(cmd.target) {
+      case DEBUG:
       case LED:
         if(cmd.action == TRIGGER) {
           blink_debug<500>();
@@ -118,6 +100,30 @@ void loop()
       case LIGHT:
         if(cmd.action == TOGGLE) {
           toggleLight.toggle();
+          valid_command = true;
+        }
+        break;
+      case PRC1:
+        if(cmd.action == ON) {
+          plug_rc_1.on();
+          valid_command = true;
+        } else if(cmd.action == OFF) {
+          plug_rc_1.off();
+          valid_command = true;
+        } else if(cmd.action == TOGGLE) {
+          plug_rc_1.toggle();
+          valid_command = true;
+        }
+        break;
+      case PRC2:
+        if(cmd.action == ON) {
+          plug_rc_2.on();
+          valid_command = true;
+        } else if(cmd.action == OFF) {
+          plug_rc_2.off();
+          valid_command = true;
+        } else if(cmd.action == TOGGLE) {
+          plug_rc_2.toggle();
           valid_command = true;
         }
         break;
@@ -132,10 +138,6 @@ void loop()
           tetris.toggle();
           valid_command = true;
         }
-        break;
-      case DEBUG:
-        print_debug();
-        valid_command = true;
         break;
       case CLOCK:
         if(cmd.action == AUTO) {

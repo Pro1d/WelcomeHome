@@ -10,9 +10,7 @@
 #define ANALOG_TEMPERATURE_PIN  2 // A2
 #define PUSH_BUTTON_PIN         2
 #define TONE_PIN                3
-#define BAD_THRESHOLD_BUTTON_PIN 6
-#define MATRIX_LED_ROW          {24, 22, 23, 27, 28}
-#define MATRIX_LED_COLUMN       {32, 30, 26, 25, 29, 31, 33}
+#define TRANSMITTER_433_PIN     7
 #define LIGHT_DETECTION_STATUS  8
 #define TETRIS_COIL_SET         9
 #define TETRIS_COIL_RESET       10
@@ -21,6 +19,16 @@
 #ifndef LED_BUILTIN
 #define LED_BUILTIN             13
 #endif
+#define MATRIX_LED_ROW          {24, 22, 23, 27, 28}
+#define MATRIX_LED_COLUMN       {32, 30, 26, 25, 29, 31, 33}
+
+#define PRC_PERIOD               1648 // microseconds
+#define PRC_DURATION_ONE         1212 // microseconds
+#define PRC_DURATION_ZERO        392 // microseconds
+#define PRC_BITS_ON              1,0,1,0
+#define PRC_BITS_OFF             1,0,0,0
+#define PRC_BITS_I1  0, 0,0,1,0, 1,0,1,0, 0,0,1,0, 1,0,1,0, 1,0,1,0
+#define PRC_BITS_I2  0, 0,0,1,0, 1,0,1,0, 1,0,0,0, 1,0,1,0, 1,0,1,0
 
 #define SERIAL_HEADER_BYTE (static_cast<char>('$'))
 
@@ -37,6 +45,8 @@ enum Target : char {
   LIGHT = 'L',
   DEBUG = 'D',
   CLOCK = 'C',
+  PRC1 = 'P',
+  PRC2 = 'Q',
 };
 
 enum Action : char {
