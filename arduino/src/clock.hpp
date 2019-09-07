@@ -69,7 +69,7 @@ public:
     txt[4] = time[M2];
     txt[5] = '\0';
   }
-public:
+private:
   unsigned long last_frame;
   char time[6]; // HHMMSS
 };

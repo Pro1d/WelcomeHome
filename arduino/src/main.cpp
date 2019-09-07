@@ -14,6 +14,7 @@
 #include "sensors_stream.hpp"
 #include "transmitter_433.hpp"
 #include "plug_remote_control.hpp"
+#include "temperature_sensor.hpp"
 
 // Global variable - declared in output_serial.hpp
 OutputSerial OSerial;
@@ -41,6 +42,7 @@ SensorsStream<LightSensorType> sensors_stream(lightSensor);
 TransmitterType tm433;
 PlugRemoteControl<TransmitterType, PRC_BITS_I1> plug_rc_1(tm433);
 PlugRemoteControl<TransmitterType, PRC_BITS_I2> plug_rc_2(tm433);
+TemperatureSensor<ANALOG_TEMPERATURE_INT_PIN, ANALOG_TEMPERATURE_EXT_PIN> tempSensor;
 
 bool cmd_toggle_light = false;
 
@@ -74,6 +76,7 @@ void setup()
   tm433.init();
   plug_rc_1.init(false);
   plug_rc_2.init(false);
+  tempSensor.init();
   // Push button for light
   pinMode(PUSH_BUTTON_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(PUSH_BUTTON_PIN), on_button_pushed, FALLING);
@@ -172,6 +175,11 @@ void loop()
     char time[6];
     clock.getTimeF(time);
     text.start(time);
+  }
+  else if(tempSensor.update()) {
+    char temp[10];
+    tempSensor.getTemperatures(temp);
+    text.start(temp);
   }
   else {
     snake.update(matrix);

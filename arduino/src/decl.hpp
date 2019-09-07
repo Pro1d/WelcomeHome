@@ -8,6 +8,8 @@
 #define ANALOG_HIGH_LUMINOSITY_PIN  0 // A0
 #define ANALOG_LOW_LUMINOSITY_PIN   1 // A1
 #define ANALOG_TEMPERATURE_PIN  2 // A2
+#define ANALOG_TEMPERATURE_INT_PIN  8 // A8
+#define ANALOG_TEMPERATURE_EXT_PIN  9 // A9
 #define PUSH_BUTTON_PIN         2
 #define TONE_PIN                3
 #define TRANSMITTER_433_PIN     7
