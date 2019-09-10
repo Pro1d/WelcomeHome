@@ -177,8 +177,9 @@ if __name__ == "__main__":
                         if m['subtype'] == EST_AUTO_LIGHT_OFF:
                             rpc_client.sendMsg("tts", "Automatic switch off")
                         elif m['subtype'] == EST_SNAKE_HIGH_SCORE:
-                            if 9 <= time.localtime().tm_hour < 23:
-                                rpc_client.sendMsg("tts", "The new high score is {}! Congratulation".format(m['data32']))
+                            best_score = m['data32']
+                            if best_score > 50 and 10 <= time.localtime().tm_hour < 22:
+                                rpc_client.sendMsg("tts", "The new high score is {}!".format(best_score))
                             write_snake_score(m['data32'])
                         elif m['subtype'] == EST_SNAKE_SCORE:
                             write_snake_score(m['data32'])
