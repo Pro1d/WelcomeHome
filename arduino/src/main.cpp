@@ -21,6 +21,7 @@ OutputSerial OSerial;
 
 using LightToggleType = LatchingRelayControl<LIGHT_COIL_1, LIGHT_COIL_2>;
 using LightSensorType = LightSensor<ANALOG_HIGH_LUMINOSITY_PIN, ANALOG_LOW_LUMINOSITY_PIN>;
+using TemperatureSensorType = TemperatureSensor<ANALOG_TEMPERATURE_INT_PIN, ANALOG_TEMPERATURE_EXT_PIN>;
 using TextAnimationType = TextAnimation<MATRIX_LED_ROWS, MATRIX_LED_COLS>;
 using TransmitterType = Transmitter433<TRANSMITTER_433_PIN, PRC_PERIOD, PRC_DURATION_ONE, PRC_DURATION_ZERO>;
 
@@ -36,13 +37,13 @@ Matrix<MATRIX_LED_ROWS, MATRIX_LED_COLS, MLR, MLC> matrix;
 SnakeAnimation<MATRIX_LED_ROWS, MATRIX_LED_COLS> snake;
 TextAnimationType text;
 LightSensorType lightSensor;
+TemperatureSensorType tempSensor;
 AutoLightOff<LightToggleType, LightSensorType, TextAnimationType> autoLightOff(toggleLight, lightSensor, text);
 Clock clock;
-SensorsStream<LightSensorType> sensors_stream(lightSensor);
+SensorsStream<LightSensorType, TemperatureSensorType> sensors_stream(lightSensor, tempSensor);
 TransmitterType tm433;
 PlugRemoteControl<TransmitterType, PRC_BITS_I1> plug_rc_1(tm433);
 PlugRemoteControl<TransmitterType, PRC_BITS_I2> plug_rc_2(tm433);
-TemperatureSensor<ANALOG_TEMPERATURE_INT_PIN, ANALOG_TEMPERATURE_EXT_PIN> tempSensor;
 
 bool cmd_toggle_light = false;
 

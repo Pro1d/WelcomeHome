@@ -1,12 +1,12 @@
 #pragma once
 
-#define SENSORS_STREAM_PERIOD 1000 // ms
+#define SENSORS_STREAM_PERIOD 60000uL // ms
 
-template <typename LightSensorType>
+template <typename LightSensorType, typename TemperatureSensorType>
 class SensorsStream {
 public:
-  SensorsStream(const LightSensorType& lsensor)
-    : light_sensor{lsensor}
+  SensorsStream(const LightSensorType& lsensor, const TemperatureSensorType& tsensor)
+    : light_sensor{lsensor}, temperature_sensor{tsensor}
   {
   }
 
@@ -26,10 +26,13 @@ public:
         light_sensor.is_light_on(),
         light_sensor.is_day_light(),
         light_sensor.get_luminosity_high(),
-        light_sensor.get_luminosity_low());
+        light_sensor.get_luminosity_low(),
+        temperature_sensor.getTemperatureExt(),
+        temperature_sensor.getTemperatureInt());
   }
 
 private:
   unsigned long last_frame;
   const LightSensorType& light_sensor;
+  const TemperatureSensorType& temperature_sensor;
 };

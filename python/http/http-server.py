@@ -10,6 +10,14 @@ from messaging.rpyc_client import Client
 
 msg_client = None
 
+def read_last_line(filename):
+    with open(filename, 'rb') as f:
+        f.seek(-2, os.SEEK_END) 
+        while f.read(1) != b'\n':
+            f.seek(-2, os.SEEK_CUR) 
+        return f.readline().decode()[:-1]
+    return None
+
 class RequestHandler(BaseHTTPRequestHandler):
 
     def _parse_request(self):
@@ -36,6 +44,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do(self, method, path, args):
         retval = None
+        data = None
         path = path.split('/')[1:]
         if len(path) == 2 and path[0] == "mega":
             if msg_client.sendMsg("arduino", str([path[1], args])):
@@ -60,12 +69,18 @@ class RequestHandler(BaseHTTPRequestHandler):
                 retval = 0
                 msg_client.sendMsg("tts", "System reboot")
                 sys.Popen(['reboot'])
-        
+        elif path == ['sensor']:
+            data = read_last_line("/home/pi/sensors.txt")+'\n'
+            retval = 0 if data else 1
+
         if retval is None:
             self.send_error(400, 'Bad Request')
         elif retval == 0:
             self.send_response(200)
+            self.send_header("Content-type", "text/plain;charset=utf-8")
             self.end_headers()
+            if data:
+                self.wfile.write(data.encode("utf-8"))
         else:
             self.send_error(500, 'Trigger command failed')
 

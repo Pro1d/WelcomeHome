@@ -38,7 +38,7 @@ COMMANDS = {
 
 HEADER = "$"
 bHEADER = HEADER.encode()
-
+SENSOR_KEYS = ('light_on', 'day_light', 'luminosity_high', 'luminosity_low', 'temperature_ext', 'temperature_int')
 SERIAL_MSG_DESC = {
         # HEADER+TYPE:
         #   type, (fmt cf. struct + S for uint16+string), (field names)
@@ -47,7 +47,7 @@ SERIAL_MSG_DESC = {
         bHEADER+b'D':
             ('debug',   '<S',    ('text',)),
         bHEADER+b'S':
-            ('sensors', '<??hh', ('light_on', 'day_light', 'luminosity_high', 'luminosity_low')),
+            ('sensors', '<??hhff', SENSOR_KEYS),
 }
 # Event Subtype list
 EST_AUTO_LIGHT_OFF = b'L'
@@ -142,6 +142,11 @@ def write_snake_score(score):
     with open('/home/pi/snake_score.txt', 'a') as f:
         f.write(str(score)+'\n')
 
+def write_sensors(timestamp, values):
+    with open('/home/pi/sensors.txt', 'a') as f:
+        f.write(str(timestamp) + " ")
+        f.write(" ".join(str(values[k]) for k in SENSOR_KEYS)+"\n")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", "--port", type=int, default=18812,
@@ -172,7 +177,7 @@ if __name__ == "__main__":
                     if m['type'] == "debug":
                         print(format_time() + " " + m['text'].decode())
                     elif m['type'] == "sensors":
-                        pass
+                        write_sensors(time.time(), m)
                     elif m['type'] == "event":
                         if m['subtype'] == EST_AUTO_LIGHT_OFF:
                             rpc_client.sendMsg("tts", "Automatic switch off")
