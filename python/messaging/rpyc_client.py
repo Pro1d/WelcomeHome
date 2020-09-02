@@ -1,15 +1,19 @@
 #!/usr/bin/python3
 import rpyc
+from rpyc.utils.helpers import classpartial
 import sys
 import time
 
-class ClientService(rpyc.Service):
+class MessagingClientService(rpyc.Service):
+    exposed_clientID = ""
+
+    def __init__(self, clientID, cb):
+        self.exposed_clientID = clientID
+        self._callback = cb
+
     def exposed_catchData(self, dataType, sender, data):
         if self._callback is not None:
             self._callback(dataType, sender, data)
-
-    def set_callback(self, cb):
-        self._callback = cb
 
 class Client(object):
 
@@ -18,15 +22,14 @@ class Client(object):
         conn = None
         while conn is None:
             try:
-                conn = rpyc.connect(address, port=port, service=ClientService)
+                service = classpartial(MessagingClientService, name, callback)
+                conn = rpyc.connect(address, port, service=service)
                 self._conn = conn
             except Exception as e:
                 print(e, file=sys.stderr)
                 print("Retry in 5sec...")
                 time.sleep(5)
 
-        self._conn._local_root.set_callback(callback)
-        self._conn.root.registerClient(name)
         rpyc.BgServingThread(self._conn)
 
     def sendMsg(self, dest, data):
