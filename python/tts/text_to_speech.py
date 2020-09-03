@@ -13,8 +13,8 @@ For a list, the first string can be "en", "fr" or "??-??" to specify a language
 
 text_queue = Queue(64)
 CLIENT_NAME = "tts"
-PLAYER_PRG = "/usr/bin/mplayer"
-PLAYER_ARGS = "-ao alsa -really-quiet -noconsolecontrols -volume 50 -softvol"
+PLAYER_PRG = "/usr/bin/mpg123"
+PLAYER_ARGS = "-o alsa -q"
 LANG = {"en": "En-uk", "fr": "Fr-fr"}
 
 def build_url(lang, txt):
