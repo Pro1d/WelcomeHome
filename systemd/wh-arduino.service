@@ -1,0 +1,15 @@
+[Unit]
+Description=arduino
+After=wh-master.service wh-web-interface.service
+
+[Service]
+StandardOutput=kmsg+console
+StandardError=kmsg+console
+Type=simple
+Restart=always
+RestartSec=3
+Environment="PYTHONPATH=$PYTHONPATH:/home/pi/projects/WelcomeHome/python"
+ExecStart=/usr/bin/python3 /home/pi/projects/WelcomeHome/python/io_serial/arduino.py --port 18812 --file /dev/serial/by-id/usb-Arduino__www.arduino.cc__Arduino_Mega_2560_6493234393835130B172-if00
+
+[Install]
+WantedBy=multi-user.target

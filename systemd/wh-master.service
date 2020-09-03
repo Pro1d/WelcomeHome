@@ -1,0 +1,13 @@
+# sudo cp -l wh-master.service /etc/systemd/system/wh-master.service
+[Unit]
+Description=rpyc_server
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=3
+#User=%i # /etc/systemd/system/wh-master@pi.service
+ExecStart=/usr/bin/python3 /home/pi/projects/WelcomeHome/python/messaging/rpyc_server.py --port 18812
+
+[Install]
+WantedBy=multi-user.target

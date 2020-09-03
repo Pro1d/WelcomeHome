@@ -23,7 +23,7 @@ My solution to make my home be smart and cozy.
  * Wireless Local Area Network
  * Raspberry Pi 3
  * Python3 
-    * Main libraries: pyserial, [rpyc](https://rpyc.readthedocs.io/en/latest/) 3.4.4, http.server
+    * Main libraries: pyserial, [rpyc](https://rpyc.readthedocs.io/en/latest/), http.server
     * [Google Drive python API](https://developers.google.com/drive/v3/web/about-sdk)
  * systemd services
  * [HTTP-shortcuts](https://github.com/Waboodoo/HTTP-Shortcuts) widgets for Android

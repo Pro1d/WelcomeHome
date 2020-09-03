@@ -1,0 +1,13 @@
+[Unit]
+Description=http_server
+After=wh-master.service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=3
+Environment="PYTHONPATH=$PYTHONPATH:/home/pi/projects/WelcomeHome/python"
+ExecStart=/usr/bin/python3 /home/pi/projects/WelcomeHome/python/http/http-server.py --port 18812 --http-port 80
+
+[Install]
+WantedBy=multi-user.target

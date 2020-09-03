@@ -1,0 +1,14 @@
+[Unit]
+Description=tts
+After=wh-master.service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=3
+Environment="PYTHONPATH=$PYTHONPATH:/home/pi/projects/WelcomeHome/python"
+ExecStart=/usr/bin/python3 /home/pi/projects/WelcomeHome/python/tts/text_to_speech.py --port 18812
+ 
+
+[Install]
+WantedBy=multi-user.target
