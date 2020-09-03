@@ -63,7 +63,7 @@ def messageSegmentation(data):
             i += 1
             if i+2 > len(data):
                 return (msgs, i)
-        
+
         # save the current index, if the message is incomplete, the next
         # messageSegment will start at this index
         begin = i
@@ -75,7 +75,7 @@ def messageSegmentation(data):
         for f in range(0, len(fmt)-1):
             fmt[f] = fmt[f]+'H' # add uint16 before each 'S'
         i += 2
-        
+
         # unpack
         pack = []
         for f in range(len(fmt)):
@@ -105,10 +105,10 @@ def receiveCallback(dtype, sender, data):
         assert args["action"] in COMMANDS[domain], "Unknown action"
         if domain in TARGETS:
             msg = TARGETS[domain]+ACTIONS[args["action"]]
-        print("Received:", domain, args["action"])
+        print("Received:", domain, args["action"], "raw:", msg)
     except:
         print("Invalid message:", data)
-    
+
     if msg is not None:
         ser.write(HEADER+msg)
         return True
@@ -133,8 +133,8 @@ def publish_clock():
         ser.write(HEADER+TARGETS["clock"]+ACTIONS["auto"]
                 +"%02d%02d%02d" % (t.tm_hour, t.tm_min, t.tm_sec))
 
-def format_time():
-    t = time.localtime()
+def format_time(*seconds):
+    t = time.localtime(*seconds)
     return "[%4d-%02d-%02d.%02d:%02d:%02d]" % (t.tm_year, t.tm_mon, t.tm_mday,
             t.tm_hour, t.tm_min, t.tm_sec)
 
@@ -144,6 +144,7 @@ def write_snake_score(score):
 
 def write_sensors(timestamp, values):
     with open('/home/pi/sensors.txt', 'a') as f:
+        f.write(format_time(timestamp) + " ")
         f.write(str(timestamp) + " ")
         f.write(" ".join(str(values[k]) for k in SENSOR_KEYS)+"\n")
 
