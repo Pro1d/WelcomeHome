@@ -3,6 +3,7 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import sys
+import subprocess
 import os
 import argparse
 from messaging.rpyc_client import Client
@@ -57,18 +58,25 @@ class RequestHandler(BaseHTTPRequestHandler):
                 retval = 0
             else:
                 retval = 1
-        elif len(path) == 2 and path[0] == "player":
-            if msg_client.sendMsg("mediaplayer", str((path[1], args))):
-                retval = 0
-            else:
-                retval = 1
-        elif path == ['system', 'reboot']:
+        #elif len(path) == 2 and path[0] == "player":
+        #    if msg_client.sendMsg("mediaplayer", str((path[1], args))):
+        #        retval = 0
+        #    else:
+        #        retval = 1
+        elif len(path) == 2 and path[0] == 'system':
             if os.geteuid() != 0:
                 retval = 1
             else:
                 retval = 0
-                msg_client.sendMsg("tts", "System reboot")
-                sys.Popen(['reboot'])
+
+                if path[1] == 'shutdown':
+                    msg_client.sendMsg("tts", "System shutdown")
+                    subprocess.Popen(['shutdown', 'now'])
+                elif path[1] == 'reboot':
+                    msg_client.sendMsg("tts", "System reboot")
+                    subprocess.Popen(['reboot'])
+                else:
+                    retval = 1
         elif path == ['sensor']:
             data = read_last_line("/home/pi/sensors.txt")+'\n'
             retval = 0 if data else 1
