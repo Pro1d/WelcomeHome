@@ -1,0 +1,345 @@
+{
+  "categories": [
+    {
+      "id": "1",
+      "layoutType": "grid",
+      "name": "Mega",
+      "shortcuts": [
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "blink",
+          "feedback": "simple_response",
+          "iconName": "flat_color_focus",
+          "id": "1",
+          "name": "led",
+          "timeout": 3000,
+          "url": "http://welcomehome/mega/blink?action\u003dtrigger"
+        },
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "Reboot system",
+          "feedback": "simple_response",
+          "iconName": "bitsies_shutdown",
+          "id": "15",
+          "name": "Reboot",
+          "timeout": 3000,
+          "url": "http://welcomehome/system/reboot"
+        },
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "Shutdown system",
+          "feedback": "simple_response",
+          "iconName": "bitsies_shutdown",
+          "id": "4b3a2437-7765-4d94-9fd7-c2942ad6aa52",
+          "name": "Shutdown ",
+          "timeout": 3000,
+          "url": "http://welcomehome/system/shutdown"
+        },
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "log",
+          "feedback": "simple_response",
+          "iconName": "flat_color_dev",
+          "id": "6",
+          "name": "debug",
+          "timeout": 3000,
+          "url": "http://welcomehome/mega/debug?action\u003dtrigger"
+        },
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "text to speech",
+          "feedback": "simple_response",
+          "iconName": "flat_color_chat",
+          "id": "10",
+          "name": "tts",
+          "timeout": 3000,
+          "url": "http://welcomehome/tts?text\u003d{{3}}\u0026lang\u003d{{9}}"
+        },
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "Display sensors status",
+          "feedback": "dialog",
+          "iconName": "flat_color_barchart",
+          "id": "af01345c-5408-433e-96e2-3c54042d3589",
+          "name": "sensors",
+          "timeout": 3000,
+          "url": "http://welcomehome/sensor"
+        },
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "Video with url",
+          "feedback": "simple_response",
+          "iconName": "flat_color_clapboard",
+          "id": "11",
+          "name": "video",
+          "timeout": 3000,
+          "url": "http://welcomehome/player/video?url\u003d{{7}}\u0026append\u003d{{8}}"
+        },
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "music with url",
+          "feedback": "simple_response",
+          "iconName": "flat_color_music",
+          "id": "12",
+          "name": "music url",
+          "timeout": 3000,
+          "url": "http://welcomehome/player/music?url\u003d{{1}}\u0026append\u003d{{8}}"
+        },
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "music with file",
+          "feedback": "simple_response",
+          "iconName": "flat_color_music",
+          "id": "14",
+          "name": "music file",
+          "timeout": 3000,
+          "url": "http://welcomehome/player/music?path\u003d{{6}}\u0026append\u003d{{8}}"
+        },
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "player remote",
+          "feedback": "simple_response",
+          "iconName": "flat_color_smartphone",
+          "id": "13",
+          "name": "remote",
+          "timeout": 3000,
+          "url": "http://welcomehome/player/control?action\u003d{{2}}"
+        },
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "close",
+          "feedback": "simple_response",
+          "iconName": "flat_color_denied",
+          "id": "8",
+          "name": "close serial",
+          "timeout": 3000,
+          "url": "http://welcomehome/mega/serial?action\u003doff"
+        },
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "serial open",
+          "feedback": "simple_response",
+          "iconName": "flat_color_radiotower",
+          "id": "9",
+          "name": "open serial",
+          "timeout": 3000,
+          "url": "http://welcomehome/mega/serial?action\u003don"
+        },
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "toggle",
+          "feedback": "simple_response",
+          "iconName": "flat_color_brightness",
+          "id": "2",
+          "name": "light",
+          "timeout": 3000,
+          "url": "http://welcomehome/mega/light?action\u003dtoggle"
+        },
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "toggle",
+          "feedback": "simple_response",
+          "iconName": "flat_color_plugin",
+          "id": "16",
+          "name": "plug 1",
+          "timeout": 3000,
+          "url": "http://welcomehome/mega/plug1?action\u003dtoggle"
+        },
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "toggle",
+          "feedback": "simple_response",
+          "iconName": "flat_color_plugin",
+          "id": "17",
+          "name": "plug 2",
+          "timeout": 3000,
+          "url": "http://welcomehome/mega/plug2?action\u003dtoggle"
+        },
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "off",
+          "feedback": "simple_response",
+          "iconName": "flat_color_volume",
+          "id": "4",
+          "name": "tetris off",
+          "timeout": 3000,
+          "url": "http://welcomehome/mega/tetris?action\u003doff"
+        },
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "on",
+          "feedback": "simple_response",
+          "iconName": "flat_color_volume",
+          "id": "5",
+          "name": "tetris on",
+          "timeout": 3000,
+          "url": "http://welcomehome/mega/tetris?action\u003don"
+        },
+        {
+          "codeOnFailure": "_runAction(\"vibrate\", {\"pattern\":\"1\",\"wait\":\"false\"}); /* built-in */\n",
+          "codeOnPrepare": "_runAction(\"vibrate\", {\"pattern\":\"0\",\"wait\":\"false\"}); /* built-in */\n",
+          "contentType": "text/plain",
+          "description": "toggle",
+          "feedback": "simple_response",
+          "iconName": "flat_color_volume",
+          "id": "18",
+          "name": "tetris",
+          "timeout": 3000,
+          "url": "http://welcomehome/mega/tetris?action\u003dtoggle"
+        }
+      ]
+    }
+  ],
+  "variables": [
+    {
+      "flags": 1,
+      "id": "1",
+      "key": "urlmusic",
+      "rememberValue": true,
+      "title": "Music URL",
+      "type": "text",
+      "urlEncode": true
+    },
+    {
+      "id": "2",
+      "key": "remotekey",
+      "options": [
+        {
+          "id": "67de4b6c-ddc6-4607-8f79-2e3ff85e2a97",
+          "label": "⏯️ play / pause",
+          "value": "playpause"
+        },
+        {
+          "id": "25abe3b8-47b0-4576-98d0-2c8b0ea132aa",
+          "label": "⏹️ stop",
+          "value": "stop"
+        },
+        {
+          "id": "09aa5e6b-d97f-4e67-a169-d7031293de6a",
+          "label": "⏮️ previous",
+          "value": "prev"
+        },
+        {
+          "id": "c3858904-5152-452f-bc7c-067a9af95d30",
+          "label": "⏭️ next",
+          "value": "next"
+        },
+        {
+          "id": "c1cc13c8-edd8-46da-8234-53b5d6cd752a",
+          "label": "🔊 volume",
+          "value": "volume\u0026value\u003d{{5}}"
+        },
+        {
+          "id": "94e8ef9b-e927-4c47-add8-603e071e38a6",
+          "label": "ℹ️ info",
+          "value": "info"
+        }
+      ],
+      "title": "Remote controller",
+      "type": "select",
+      "value": "volume\u0026value\u003d{{5}}"
+    },
+    {
+      "id": "3",
+      "key": "text",
+      "title": "Text to speech",
+      "type": "text",
+      "urlEncode": true
+    },
+    {
+      "data": "{\"slider\":{\"max\":\"100\",\"min\":\"0\",\"step\":\"1\"}}",
+      "id": "4",
+      "key": "seek",
+      "title": "Seek cursor position",
+      "type": "slider"
+    },
+    {
+      "data": "{\"slider\":{\"max\":\"100\",\"min\":\"0\",\"step\":\"2\"}}",
+      "id": "5",
+      "key": "volume",
+      "rememberValue": true,
+      "title": "Set volume",
+      "type": "slider",
+      "value": "32"
+    },
+    {
+      "id": "6",
+      "key": "path",
+      "rememberValue": true,
+      "title": "File/directory path",
+      "type": "text",
+      "urlEncode": true,
+      "value": "/home/pi/Music/"
+    },
+    {
+      "flags": 1,
+      "id": "7",
+      "key": "urlvideo",
+      "rememberValue": true,
+      "title": "Video URL",
+      "type": "text",
+      "urlEncode": true
+    },
+    {
+      "id": "8",
+      "key": "append",
+      "options": [
+        {
+          "id": "fbf3b5b4-0069-4dfe-b870-e48dfcc693ee",
+          "label": "✔️ Play now",
+          "value": "0"
+        },
+        {
+          "id": "620b961c-99d7-427c-ab17-ff64bba45c3f",
+          "label": "➕ Add next",
+          "value": "1"
+        }
+      ],
+      "type": "select",
+      "value": "0"
+    },
+    {
+      "id": "9",
+      "key": "lang",
+      "rememberValue": true,
+      "title": "Language",
+      "type": "text",
+      "value": "Fr-fr"
+    }
+  ],
+  "version": 39
+}
